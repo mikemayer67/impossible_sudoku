@@ -9,9 +9,10 @@
 /* Begin PBXBuildFile section */
 		27496B73277EBCB90042A11B /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B72277EBCB90042A11B /* main.swift */; };
 		27496B7D277EBE160042A11B /* dlx_node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B7C277EBE160042A11B /* dlx_node.swift */; };
-		27496B80277F523F0042A11B /* dlx_row_node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B7F277F523F0042A11B /* dlx_row_node.swift */; };
+		27496B80277F523F0042A11B /* dlx_row.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B7F277F523F0042A11B /* dlx_row.swift */; };
 		27496B8827802D410042A11B /* cages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B8727802D410042A11B /* cages.swift */; };
-		27496B8C278142B30042A11B /* dlx_head_node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B8B278142B30042A11B /* dlx_head_node.swift */; };
+		27496B8C278142B30042A11B /* dlx_head.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B8B278142B30042A11B /* dlx_head.swift */; };
+		27537A372784DF5D00641795 /* dlx_column.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27537A362784DF5D00641795 /* dlx_column.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,9 +31,10 @@
 		27496B6F277EBCB90042A11B /* impossible_sudoku */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = impossible_sudoku; sourceTree = BUILT_PRODUCTS_DIR; };
 		27496B72277EBCB90042A11B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		27496B7C277EBE160042A11B /* dlx_node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dlx_node.swift; sourceTree = "<group>"; };
-		27496B7F277F523F0042A11B /* dlx_row_node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dlx_row_node.swift; sourceTree = "<group>"; };
+		27496B7F277F523F0042A11B /* dlx_row.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dlx_row.swift; sourceTree = "<group>"; };
 		27496B8727802D410042A11B /* cages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cages.swift; sourceTree = "<group>"; };
-		27496B8B278142B30042A11B /* dlx_head_node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dlx_head_node.swift; sourceTree = "<group>"; };
+		27496B8B278142B30042A11B /* dlx_head.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dlx_head.swift; sourceTree = "<group>"; };
+		27537A362784DF5D00641795 /* dlx_column.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dlx_column.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,8 +70,9 @@
 				27496B72277EBCB90042A11B /* main.swift */,
 				27496B8727802D410042A11B /* cages.swift */,
 				27496B7C277EBE160042A11B /* dlx_node.swift */,
-				27496B8B278142B30042A11B /* dlx_head_node.swift */,
-				27496B7F277F523F0042A11B /* dlx_row_node.swift */,
+				27496B7F277F523F0042A11B /* dlx_row.swift */,
+				27537A362784DF5D00641795 /* dlx_column.swift */,
+				27496B8B278142B30042A11B /* dlx_head.swift */,
 			);
 			path = impossible_sudoku;
 			sourceTree = "<group>";
@@ -131,10 +134,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				27496B8C278142B30042A11B /* dlx_head_node.swift in Sources */,
+				27496B8C278142B30042A11B /* dlx_head.swift in Sources */,
 				27496B7D277EBE160042A11B /* dlx_node.swift in Sources */,
+				27537A372784DF5D00641795 /* dlx_column.swift in Sources */,
 				27496B8827802D410042A11B /* cages.swift in Sources */,
-				27496B80277F523F0042A11B /* dlx_row_node.swift in Sources */,
+				27496B80277F523F0042A11B /* dlx_row.swift in Sources */,
 				27496B73277EBCB90042A11B /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

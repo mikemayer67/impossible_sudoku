@@ -33,7 +33,7 @@ class DLXOnGridRow : DLXRowNode
   {
     self.gridRow = gridRow
     self.gridCol = gridCol
-    super.init(label:"\(gridRow)\(gridCol):\(digit)", digit:digit)
+    super.init(label:"\(gridRow+1)\(gridCol+1):\(digit)", digit:digit)
   }
   
   override func test_compatibility(with other:DLXNode)
@@ -63,7 +63,7 @@ class DLXOffGridRow : DLXRowNode
   {
     self.cage = cage
     self.cageIndex = index
-    super.init(label:"\(cage)\(cageIndex):\(digit)", digit:digit)
+    super.init(label:"\(cage)\(cageIndex+1):\(digit)", digit:digit)
   }
 
   override func test_compatibility(with other:DLXNode)

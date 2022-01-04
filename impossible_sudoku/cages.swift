@@ -11,8 +11,14 @@ typealias GridCoord = (Int,Int)
 typealias GridCoords = Array<GridCoord>
 typealias Cages = Dictionary<Character,GridCoords>
 
-func gen_cages()->Cages
-{
+let cageCodes = Array("ABCDEFGHJ")
+let cageIndices : Dictionary<Character,Int> = {
+  var xref = Dictionary<Character,Int>()
+  for (i,c) in cageCodes.enumerated() { xref[c] = i }
+  return xref
+}()
+
+let cages : Cages = {
   let grid_coloring = [
     "AAADDDGGG",
     "A BDEDGHG",
@@ -26,7 +32,6 @@ func gen_cages()->Cages
   ]
   
   var rval = Cages()
-  
   for (r,s) in grid_coloring.enumerated() {
     for (c,cage) in s.enumerated() {
       if cage == " " { continue }
@@ -40,5 +45,5 @@ func gen_cages()->Cages
     }
   }
   return rval
-}
+}()
 
