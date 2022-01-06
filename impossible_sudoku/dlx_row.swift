@@ -28,7 +28,7 @@ class DLXRowNode : DLXNode
   {
     guard !hidden else { return false }
     self.unlink(.Row)
-    for node in DLX.RowNodes(self) {
+    for node in RowNodes(self) {
       node.unlink(.Row)
       node.column.nrows -= 1
     }

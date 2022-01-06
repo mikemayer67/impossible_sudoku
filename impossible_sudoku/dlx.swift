@@ -17,64 +17,29 @@ class DLX
 {
   let head = DLXHeadNode()
   var solution = Array<DLXRowNode>()
+
+  let rows : Rows
+  let cols : Cols
   
-  class Rows : Sequence {
-    typealias Element = DLXRowNode
-    let firstRow : Element?
-    init(_ head:DLXNode) { self.firstRow = head.nextRow as? Element }
-    func makeIterator() -> AnyIterator<Element> {
-      var cur : Element? = self.firstRow
-      return AnyIterator<Element> { () -> Element? in
-        defer { cur = cur?.nextRow as? Element }
-        return cur
-      }
-    }
-  }
-  lazy var rows = Rows(self.head)
-  
-  class Cols : Sequence {
-    typealias Element = DLXColumnNode
-    let firstCol : Element?
-    init(_ head:DLXNode) { self.firstCol = head.nextCol as? Element }
-    func makeIterator() -> AnyIterator<Element> {
-      var cur : Element? = self.firstCol
-      return AnyIterator<Element> { () -> Element? in
-        defer { cur = cur?.nextCol as? Element }
-        return cur
-      }
-    }
-  }
-  lazy var cols = Cols(self.head)
-  
-  class NodeSequence : Sequence {
-    typealias Element = DLXCoverNode
-    let firstNode : Element?
-    let type : GridDimension
-    init(_ head:DLXNode, type:GridDimension) {
-      self.type = type
-      switch type {
-      case .Row: self.firstNode = head.nextCol as? Element
-      case .Col: self.firstNode = head.nextRow as? Element
-      }
-    }
-    func makeIterator() -> AnyIterator<Element> {
-      var cur : Element? = self.firstNode
-      let type = self.type
-      return AnyIterator<Element> { () -> Element? in
-        defer {
-          switch type {
-          case .Row: cur = cur?.nextCol as? Element
-          case .Col: cur = cur?.nextRow as? Element
-          }
+  init()
+  {
+    head.add_rows()
+    head.add_cols()
+    
+    self.rows = Rows(head)
+    self.cols = Cols(head)
+    
+    for row in self.rows {
+      for col in self.cols {
+        if row.covers(column:col) {
+          col.nrows += 1
+          let x = DLXCoverNode(row: row, column: col)
+          x.insert(before: row)
+          x.insert(above: col)
         }
-        return cur
       }
     }
   }
-  
-  class RowNodes : NodeSequence { init(_ head:DLXNode) { super.init(head, type: .Row) } }
-  class ColNodes : NodeSequence { init(_ head:DLXNode) { super.init(head, type: .Col) } }
-  
   
   func add_to_solution(_ row:DLXRowNode)
   {
@@ -87,8 +52,7 @@ class DLX
       }
     }
     
-    for node in RowNodes(row)
-    {
+    for node in RowNodes(row) {
       node.column.cover()
     }
   }

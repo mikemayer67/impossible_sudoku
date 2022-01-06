@@ -11,9 +11,6 @@ class DLXHeadNode : DLXNode
 {
   init() {
     super.init(label:"DLX Head")
-    add_rows()
-    add_cols()
-    add_coverage()
   }
   
   func add_rows()
@@ -31,8 +28,8 @@ class DLXHeadNode : DLXNode
     
     // Add grid incompatibilites
     // No adjacent sudoku cells may contain subsequent digits
-    for a in DLX.Rows(self) {
-      for b in DLX.Rows(a) {
+    for a in Rows(self) {
+      for b in Rows(a) {
         a.test_compatibility(with: b)
       }
     }
@@ -56,8 +53,8 @@ class DLXHeadNode : DLXNode
         }
       }
       if needed == 1 { continue }
-      for a in DLX.Rows(mark) {
-        for b in DLX.Rows(a) {
+      for a in Rows(mark) {
+        for b in Rows(a) {
           a.test_compatibility(with: b)
         }
       }
@@ -88,20 +85,6 @@ class DLXHeadNode : DLXNode
     for cage in cageIndicies {
       for d in 1...9 {
         self.add(prevCol: DLXColumnNode(cage: cage, digit: d))
-      }
-    }
-  }
-  
-  func add_coverage()
-  {
-    for row in DLX.Rows(self) {
-      for col in DLX.Cols(self) {
-        if row.covers(column:col) {
-          col.nrows += 1
-          let x = DLXCoverNode(row: row, column: col)
-          x.insert(before: row)
-          x.insert(above: col)
-        }
       }
     }
   }

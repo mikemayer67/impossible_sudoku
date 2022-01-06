@@ -55,10 +55,10 @@ class DLXColumnNode : DLXNode
   {
     print("Cover column: \(self.label)")
     self.unlink(.Col)
-    for r in DLX.ColNodes(self) {
+    for r in ColNodes(self) {
       print(" Cover (row): \(r.row.label)")
       r.row.unlink(.Row)
-      for c in DLX.RowNodes(r.row) {
+      for c in RowNodes(r.row) {
         if c !== r {
           print("  Cover (node): \(c.label)")
           c.unlink(.Row)
