@@ -25,21 +25,21 @@ class DLXColumnNode : DLXNode
     self.type = DLXColumnType.GridRow
     self.index = gridRow
     self.digit = digit
-    super.init(label: "R\(index+1)=\(digit)")
+    super.init(label: "R\(index)=\(digit)")
   }
   
   init(gridCol:Int, digit:Int) {
     self.type = DLXColumnType.GridCol
     self.index = gridCol
     self.digit = digit
-    super.init(label: "C\(index+1)=\(digit)")
+    super.init(label: "C\(index)=\(digit)")
   }
   
   init(gridBox:Int, digit:Int) {
     self.type = DLXColumnType.GridBox
     self.index = gridBox
     self.digit = digit
-    super.init(label: "B\(index+1)=\(digit)")
+    super.init(label: "B\(index)=\(digit)")
   }
   
   init(cage:Int, digit:Int)
@@ -49,5 +49,22 @@ class DLXColumnNode : DLXNode
     self.digit = digit
     let key = cageLabels[cage]
     super.init(label: "X\(key)=\(digit)")
+  }
+  
+  func cover()
+  {
+    print("Cover column: \(self.label)")
+    self.unlink(.Col)
+    for r in DLX.ColNodes(self) {
+      print(" Cover (row): \(r.row.label)")
+      r.row.unlink(.Row)
+      for c in DLX.RowNodes(r.row) {
+        if c !== r {
+          print("  Cover (node): \(c.label)")
+          c.unlink(.Row)
+          c.column.nrows -= 1
+        }
+      }
+    }
   }
 }

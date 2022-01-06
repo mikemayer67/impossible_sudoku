@@ -12,9 +12,9 @@ class DLXRowNode : DLXNode
   /// Represents placing a given digit in a given solution cell
   let digit : Int
   
-  var selected = false
+  var hidden = false
   var incompatible = Array<DLXRowNode>()
-  var blocking = Array<DLXRowNode>()
+  var hiding = Array<DLXRowNode>()
   
   init(label:String, digit:Int)
   {
@@ -23,6 +23,18 @@ class DLXRowNode : DLXNode
   }
   
   func covers(column:DLXColumnNode) -> Bool { return false }
+  
+  func hide() -> Bool
+  {
+    guard !hidden else { return false }
+    self.unlink(.Row)
+    for node in DLX.RowNodes(self) {
+      node.unlink(.Row)
+      node.column.nrows -= 1
+    }
+    hidden = true
+    return true
+  }
 }
 
 class DLXOnGridRow : DLXRowNode
@@ -35,7 +47,7 @@ class DLXOnGridRow : DLXRowNode
   {
     self.gridRow = gridRow
     self.gridCol = gridCol
-    super.init(label:"\(gridRow+1)\(gridCol+1):\(digit)", digit:digit)
+    super.init(label:"\(gridRow)\(gridCol):\(digit)", digit:digit)
   }
   
   override func test_compatibility(with other:DLXNode)
@@ -85,7 +97,7 @@ class DLXOffGridRow : DLXRowNode
   {
     self.cage = cage
     self.cageIndex = index
-    super.init(label:"\(cageLabels[cage])\(cageIndex+1):\(digit)", digit:digit)
+    super.init(label:"\(cageLabels[cage])\(cageIndex):\(digit)", digit:digit)
   }
 
   override func test_compatibility(with other:DLXNode)

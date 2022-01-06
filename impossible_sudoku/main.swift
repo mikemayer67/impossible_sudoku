@@ -47,18 +47,33 @@ import Foundation
 //     - 2: subsequent digits in adjacent cells: (row=8,col=7,digit=6) and (row=8,col=6,digit=5)
 
 // DLX Head Node
-let dlx_head = DLXHeadNode()
+let dlx = DLX()
 
-//
+for r in dlx.rows {
+  if r.digit == 2,
+     let x = r as? DLXOnGridRow,
+     x.gridRow == 6,
+     x.gridCol == 3
+  {
+    dlx.add_to_solution(r)
+    break
+  }
+}
 
-for (i,r) in dlx_head.rows.enumerated() {
+print("---------")
+for (i,r) in dlx.rows.enumerated() {
   let incomp = r.incompatible.reduce("|") {
     (r,n) -> String in
     r + " " + n.label
   }
-  print("DLXRow \(i+1): \(r.label) \(incomp)")
+  let hiding = r.hiding.reduce("|") {
+   (r,n) -> String in
+   r + " " + n.label
+ }
+  print("DLXRow \(i+1): \(r.label) \(incomp) \(hiding)")
 }
-print("")
-for (i,c) in dlx_head.cols.enumerated() {
+print("---------")
+for (i,c) in dlx.cols.enumerated() {
   print("DLXCol \(i+1): \(c.label) [\(c.nrows)]")
 }
+print("---------")

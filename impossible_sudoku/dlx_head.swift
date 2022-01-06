@@ -9,34 +9,6 @@ import Foundation
 
 class DLXHeadNode : DLXNode
 {
-  class Rows : Sequence {
-    typealias Element = DLXRowNode
-    let firstRow : Element?
-    init(_ head:DLXNode) { self.firstRow = head.nextRow as? Element }
-    func makeIterator() -> AnyIterator<Element> {
-      var cur : Element? = self.firstRow
-      return AnyIterator<Element> { () -> Element? in
-        defer { cur = cur?.nextRow as? Element }
-        return cur
-      }
-    }
-  }
-  lazy var rows = Rows(self)
-  
-  class Cols : Sequence {
-    typealias Element = DLXColumnNode
-    let firstCol : Element?
-    init(_ head:DLXNode) { self.firstCol = head.nextCol as? Element }
-    func makeIterator() -> AnyIterator<Element> {
-      var cur : Element? = self.firstCol
-      return AnyIterator<Element> { () -> Element? in
-        defer { cur = cur?.nextCol as? Element }
-        return cur
-      }
-    }
-  }
-  lazy var cols = Cols(self)
-    
   init() {
     super.init(label:"DLX Head")
     add_rows()
@@ -59,8 +31,8 @@ class DLXHeadNode : DLXNode
     
     // Add grid incompatibilites
     // No adjacent sudoku cells may contain subsequent digits
-    for a in Rows(self) {
-      for b in Rows(a) {
+    for a in DLX.Rows(self) {
+      for b in DLX.Rows(a) {
         a.test_compatibility(with: b)
       }
     }
@@ -84,8 +56,8 @@ class DLXHeadNode : DLXNode
         }
       }
       if needed == 1 { continue }
-      for a in Rows(mark) {
-        for b in Rows(a) {
+      for a in DLX.Rows(mark) {
+        for b in DLX.Rows(a) {
           a.test_compatibility(with: b)
         }
       }
@@ -122,8 +94,8 @@ class DLXHeadNode : DLXNode
   
   func add_coverage()
   {
-    for row in self.rows {
-      for col in self.cols {
+    for row in DLX.Rows(self) {
+      for col in DLX.Cols(self) {
         if row.covers(column:col) {
           col.nrows += 1
           let x = DLXCoverNode(row: row, column: col)

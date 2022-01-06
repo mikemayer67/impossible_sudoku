@@ -80,28 +80,28 @@ class DLXNode {
     self.prevRow = up
   }
   
-  func coverRow()
+  func unlink(_ direction:GridDimension)
   {
-    nextRow.prevRow = prevRow
-    prevRow.nextRow = nextRow
+    switch direction {
+    case .Row:
+      nextRow.prevRow = self.prevRow
+      prevRow.nextRow = self.nextRow
+    case .Col:
+      nextCol.prevCol = self.prevCol
+      prevCol.nextCol = self.nextCol
+    }
   }
-  
-  func coverCol()
+    
+  func relink(_ direction:GridDimension)
   {
-    nextCol.prevCol = prevCol
-    prevCol.nextCol = nextCol
-  }
-  
-  func uncoverRow()
-  {
-    prevRow.nextRow = self
-    nextRow.prevRow = self
-  }
-  
-  func uncoverCol()
-  {
-    prevCol.nextCol = self
-    nextCol.prevCol = self
+    switch direction {
+    case .Row:
+      nextRow.prevRow = self
+      prevRow.nextRow = self
+    case .Col:
+      nextCol.prevCol = self
+      prevCol.nextCol = self
+    }
   }
   
   func test_compatibility(with other:DLXNode) {}
