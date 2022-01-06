@@ -42,11 +42,12 @@ class DLXColumnNode : DLXNode
     super.init(label: "B\(index+1)=\(digit)")
   }
   
-  init(cage:Character, digit:Int)
+  init(cage:Int, digit:Int)
   {
     self.type = DLXColumnType.Cage
-    self.index = cageIndices[cage]!
+    self.index = cage
     self.digit = digit
-    super.init(label: "\(cage)\(cage)=\(digit)")
+    let key = cageLabels[cage]
+    super.init(label: "X\(key)=\(digit)")
   }
 }

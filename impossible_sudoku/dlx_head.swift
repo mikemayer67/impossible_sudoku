@@ -14,9 +14,9 @@ class DLXHeadNode : DLXNode
   
   init() {
     super.init(label:"DLX Head")
-    
     add_rows()
     add_cols()
+    add_coverage()
   }
   
   func add(row:DLXRowNode)
@@ -62,7 +62,9 @@ class DLXHeadNode : DLXNode
     // For any given cage, the digits must appear in ascending order
     //   Cage[i].digit < Cage[>i].digit
         
-    for (cage,coords) in cages {
+    for cage in cageIndicies {
+      guard let coords = cageCoords[cage] else { continue }
+      
       let r = self.prevRow!
       let ncoord = coords.count
       if ncoord == 9 { continue }
@@ -106,9 +108,22 @@ class DLXHeadNode : DLXNode
       }
     }
     // Add DLX columns covering Sudoku cages
-    for c in cages.keys.sorted() {
+    for cage in cageIndicies {
       for d in 1...9 {
-        self.add(col: DLXColumnNode(cage: c, digit: d))
+        self.add(col: DLXColumnNode(cage: cage, digit: d))
+      }
+    }
+  }
+  
+  func add_coverage()
+  {
+    for row in dlx_rows {
+      for col in dlx_cols {
+        if row.covers(column:col) {
+          let x = DLXCoverNode(row: row, column: col)
+          x.insert(before: row)
+          x.insert(above: col)
+        }
       }
     }
   }

@@ -21,6 +21,8 @@ class DLXRowNode : DLXNode
     self.digit = digit
     super.init(label:label)
   }
+  
+  func covers(column:DLXColumnNode) -> Bool { return false }
 }
 
 class DLXOnGridRow : DLXRowNode
@@ -50,20 +52,40 @@ class DLXOnGridRow : DLXRowNode
       other.incompatible.append(self)
     }
   }
+  
+  override func covers(column:DLXColumnNode) -> Bool
+  {
+    guard self.digit == column.digit else { return false }
+    
+    switch column.type {
+    case .GridRow:
+      return self.gridRow == column.index
+    case .GridCol:
+      return self.gridCol == column.index
+    case .GridBox:
+      let boxRow : Int = self.gridRow / 3
+      let boxCol : Int = self.gridCol / 3
+      let boxIndex = 3*boxRow + boxCol
+      return boxIndex == column.index
+    case .Cage:
+      guard let cage = cageDef[self.gridRow][self.gridCol] else { return false }
+      return cage == column.index
+    }
+  }
 }
 
 class DLXOffGridRow : DLXRowNode
 {
   /// Represents placing a given digit in an off-grid cell.
   /// Used to complete cages with less than 9 cells on the Sudoku grid
-  let cage : Character
+  let cage : Int
   let cageIndex : Int
   
-  init(cage:Character, index:Int, digit:Int)
+  init(cage:Int, index:Int, digit:Int)
   {
     self.cage = cage
     self.cageIndex = index
-    super.init(label:"\(cage)\(cageIndex+1):\(digit)", digit:digit)
+    super.init(label:"\(cageLabels[cage])\(cageIndex+1):\(digit)", digit:digit)
   }
 
   override func test_compatibility(with other:DLXNode)
@@ -81,5 +103,17 @@ class DLXOffGridRow : DLXRowNode
     
     self.incompatible.append(other)
     other.incompatible.append(self)
+  }
+  
+  override func covers(column:DLXColumnNode) -> Bool
+  {
+    guard self.digit == column.digit else { return false }
+    
+    switch column.type {
+    case .Cage:
+      return self.cage == column.index
+    default:
+      return false
+    }
   }
 }
