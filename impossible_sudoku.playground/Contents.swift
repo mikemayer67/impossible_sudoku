@@ -1,29 +1,37 @@
 import Foundation
 
-let x =
-  "AAADDDGGG" +
-  "A BDEDGHG" +
-  "AABDEGGHH" +
-  "AABDEEG H" +
-  "BBBDDEEJH" +
-  "BCBBF FJH" +
-  "CCCCFFFJJ" +
-  "C C F FJJ" +
-  "C CFF JJJ"
-
-func f(_ c:Character) -> Int?
-{
-  switch(c) {
-  case "A"..."H":
-    return Int(c.unicodeScalars.first!.value - Unicode.Scalar("A").value)
-  case "J":
-    return 8
-  default:
-    return nil
-  }
+class Node {
+    var data: Int
+    var next: Node?
+    init(data: Int, next: Node?) {
+        self.data = data
+        self.next = next
+    }
 }
 
-let y = x.reduce(Array<Int?>()) { (r, c) in r + [f(c)] }
+class LinkedList: Sequence {
+    typealias Element = Node
+    func next() -> Node? {
+        defer {
+            head = head?.next
+        }
+        return head
+    }
 
-print(y)
+    var head: Node?
+    init(head: Node) {
+        self.head = head
+    }
+    
+}
 
+let tail = Node(data: 3, next: nil)
+let mid  = Node(data: 2, next: tail)
+let head = Node(data: 1, next: mid)
+let list = LinkedList(head: head)
+
+print("First Iter")
+for x in list { print(x.data) }
+
+print("\nSecond Iter")
+for x in list { print(x.data) }

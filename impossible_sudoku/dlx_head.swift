@@ -9,26 +9,39 @@ import Foundation
 
 class DLXHeadNode : DLXNode
 {
-  var dlx_rows = Array<DLXRowNode>()
-  var dlx_cols = Array<DLXColumnNode>()
+  class Rows : Sequence {
+    typealias Element = DLXRowNode
+    let firstRow : Element?
+    init(_ head:DLXNode) { self.firstRow = head.nextRow as? Element }
+    func makeIterator() -> AnyIterator<Element> {
+      var cur : Element? = self.firstRow
+      return AnyIterator<Element> { () -> Element? in
+        defer { cur = cur?.nextRow as? Element }
+        return cur
+      }
+    }
+  }
+  lazy var rows = Rows(self)
   
+  class Cols : Sequence {
+    typealias Element = DLXColumnNode
+    let firstCol : Element?
+    init(_ head:DLXNode) { self.firstCol = head.nextCol as? Element }
+    func makeIterator() -> AnyIterator<Element> {
+      var cur : Element? = self.firstCol
+      return AnyIterator<Element> { () -> Element? in
+        defer { cur = cur?.nextCol as? Element }
+        return cur
+      }
+    }
+  }
+  lazy var cols = Cols(self)
+    
   init() {
     super.init(label:"DLX Head")
     add_rows()
     add_cols()
     add_coverage()
-  }
-  
-  func add(row:DLXRowNode)
-  {
-    self.add(prevRow: row)
-    self.dlx_rows.append(row)
-  }
-  
-  func add(col:DLXColumnNode)
-  {
-    self.add(prevCol: col)
-    self.dlx_cols.append(col)
   }
   
   func add_rows()
@@ -39,21 +52,17 @@ class DLXHeadNode : DLXNode
     for r in 0..<9 {
       for c in 0..<9 {
         for d in 1...9 {
-          self.add(row:DLXOnGridRow(gridRow: r, gridCol: c, digit: d))
+          self.add(prevRow:DLXOnGridRow(gridRow: r, gridCol: c, digit: d))
         }
       }
     }
     
     // Add grid incompatibilites
     // No adjacent sudoku cells may contain subsequent digits
-    var a = self.nextRow!
-    while a is DLXOnGridRow {
-      var b = a.nextRow!
-      while b is DLXOnGridRow {
+    for a in Rows(self) {
+      for b in Rows(a) {
         a.test_compatibility(with: b)
-        b = b.nextRow
       }
-      a = a.nextRow!
     }
     
     // Add Off-Grid DLX rows and incompatibilities
@@ -65,24 +74,20 @@ class DLXHeadNode : DLXNode
     for cage in cageIndicies {
       guard let coords = cageCoords[cage] else { continue }
       
-      let r = self.prevRow!
+      let mark = self.prevRow!
       let ncoord = coords.count
       if ncoord == 9 { continue }
       let needed = 9 - ncoord
       for i in 0..<needed {
         for digit in 1+i...10-needed+i {
-          self.add(row: DLXOffGridRow(cage:cage, index:i, digit:digit))
+          self.add(prevRow: DLXOffGridRow(cage:cage, index:i, digit:digit))
         }
       }
       if needed == 1 { continue }
-      var a = r.nextRow!
-      while a is DLXOffGridRow {
-        var b = a.nextRow!
-        while b is DLXOffGridRow {
+      for a in Rows(mark) {
+        for b in Rows(a) {
           a.test_compatibility(with: b)
-          b = b.nextRow
         }
-        a = a.nextRow!
       }
     }
   }
@@ -92,34 +97,35 @@ class DLXHeadNode : DLXNode
     // Add DLX columns covering Sudoku grid rows
     for r in 0..<9 {
       for d in 1...9 {
-        self.add(col: DLXColumnNode(gridRow: r, digit: d))
+        self.add(prevCol: DLXColumnNode(gridRow: r, digit: d))
       }
     }
     // Add DLX columns covering Sudoku grid columns
     for c in 0..<9 {
       for d in 1...9 {
-        self.add(col: DLXColumnNode(gridCol: c, digit: d))
+        self.add(prevCol: DLXColumnNode(gridCol: c, digit: d))
       }
     }
     // Add DLX columns covering Sudoku grid boxes
     for b in 0..<9 {
       for d in 1...9 {
-        self.add(col: DLXColumnNode(gridBox: b, digit: d))
+        self.add(prevCol: DLXColumnNode(gridBox: b, digit: d))
       }
     }
     // Add DLX columns covering Sudoku cages
     for cage in cageIndicies {
       for d in 1...9 {
-        self.add(col: DLXColumnNode(cage: cage, digit: d))
+        self.add(prevCol: DLXColumnNode(cage: cage, digit: d))
       }
     }
   }
   
   func add_coverage()
   {
-    for row in dlx_rows {
-      for col in dlx_cols {
+    for row in self.rows {
+      for col in self.cols {
         if row.covers(column:col) {
+          col.nrows += 1
           let x = DLXCoverNode(row: row, column: col)
           x.insert(before: row)
           x.insert(above: col)

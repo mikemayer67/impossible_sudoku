@@ -49,22 +49,16 @@ import Foundation
 // DLX Head Node
 let dlx_head = DLXHeadNode()
 
-var i = 1
-var t : DLXNode = dlx_head
-while let r = t.nextRow as? DLXRowNode {
+//
+
+for (i,r) in dlx_head.rows.enumerated() {
   let incomp = r.incompatible.reduce("|") {
     (r,n) -> String in
     r + " " + n.label
   }
-  print("DLXRow \(i): \(r.label) \(incomp)")
-  t = r
-  i += 1
+  print("DLXRow \(i+1): \(r.label) \(incomp)")
 }
 print("")
-i = 1
-t = dlx_head
-while let c = t.nextCol as? DLXColumnNode {
-  print("DLXCol \(i): \(c.label)")
-  t = c
-  i += 1
+for (i,c) in dlx_head.cols.enumerated() {
+  print("DLXCol \(i+1): \(c.label) [\(c.nrows)]")
 }
