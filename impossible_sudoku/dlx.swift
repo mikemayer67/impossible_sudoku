@@ -51,24 +51,44 @@ class DLX
          r.gridCol == col
       {
         self.solution.append(r)
-        r.incompatible.forEach { ir in
-          if ir.hide() {
-            r.hiding.append(ir)
-          }
-        }
-        RowNodes(r).forEach {
-          node in node.column.cover()
+        r.hide_incompatible()
+        for node in RowNodes(r) {
+          node.column.cover()
         }
       }
     }
   }
   
-  func solve(solution_depth:Int=0)
+  func solve(_ solution_depth:Int=0)
   {
     if self.head.solved {
       show_solution()
       self.solved = true
       return
+    }
+    
+    //pick column
+    var c : DLXColumnNode!
+    for cand in self.cols {
+      if c == nil { c = cand }
+      else if cand.nrows < c.nrows { c = cand }
+    }
+    guard c.nrows > 0 else { return }
+    
+    print("Solve(\(solution_depth)) c:\(c.label) [\(c.nrows)]")
+    
+    c.cover()
+    for r in ColNodes(c) {
+      print("Try row \(r.row.label)")
+      solution.append(r.row)
+      r.row.hide_incompatible()
+      show_solution()
+      RowNodes(r.row).forEach() { if $0 !== r { $0.column.cover() } }
+      
+      solve(solution_depth + 1)
+      
+      print("@@@ Add uncover steps")
+      solution.removeLast()
     }
   }
   

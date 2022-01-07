@@ -55,7 +55,7 @@ class DLXColumnNode : DLXNode
   {
     self.unlink(.Col)
     for r in ColNodes(self) {
-      r.row.unlink(.Row)
+ //     r.row.unlink(.Row)
       for c in RowNodes(r.row) {
         if c !== r {
           c.unlink(.Row)

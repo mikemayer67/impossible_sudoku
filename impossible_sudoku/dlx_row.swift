@@ -35,6 +35,13 @@ class DLXRowNode : DLXNode
     hidden = true
     return true
   }
+  
+  func hide_incompatible()
+  {
+    for r in incompatible {
+      if r.hide() { self.hiding.append(r) }
+    }
+  }
 }
 
 class DLXOnGridRow : DLXRowNode

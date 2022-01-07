@@ -50,29 +50,39 @@ import Foundation
 let dlx = DLX()
 
 dlx.add_given(row: 6, col: 3, digit: 2)
-dlx.show_solution()
 dlx.solve()
 
-/*
-print("---------")
-for (i,r) in dlx.rows.enumerated() {
-  let incomp = r.incompatible.reduce("") {
-    (r,n) -> String in
-    r + " " + n.label
-  }
-  let hiding = r.hiding.reduce("") {
-   (r,n) -> String in
-   r + " " + n.label
- }
-  print("DLXRow \(i+1): \(r.label)  [\(incomp) |\(hiding) ]")
+func src()
+{
+  sr()
+  sc()
+  print("---------")
 }
-print("---------")
-for (i,c) in dlx.cols.enumerated() {
-  let nodes = ColNodes(c).reduce("") {
-    (r,n) -> String in
-    r + " " + n.row.label
+  
+func sc()
+{
+  print("---------")
+  for (i,c) in dlx.cols.enumerated() {
+    let nodes = ColNodes(c).reduce("") {
+      (r,n) -> String in
+      r + " " + n.row.label
+    }
+    print("DLXCol \(i+1): \(c.label) [\(c.nrows):\(nodes)]")
   }
-  print("DLXCol \(i+1): \(c.label) [\(c.nrows):\(nodes)]")
 }
-print("---------")
-*/
+
+func sr()
+{
+  print("---------")
+  for (i,r) in dlx.rows.enumerated() {
+    let incomp = r.incompatible.reduce("") {
+      (r,n) -> String in
+      r + " " + n.label
+    }
+    let hiding = r.hiding.reduce("") {
+     (r,n) -> String in
+     r + " " + n.label
+   }
+    print("DLXRow \(i+1): \(r.label)  [\(incomp) |\(hiding) ]")
+  }
+}
