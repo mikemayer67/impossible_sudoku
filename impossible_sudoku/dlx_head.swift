@@ -13,6 +13,8 @@ class DLXHeadNode : DLXNode
     super.init(label:"DLX Head")
   }
   
+  var solved : Bool { self.nextCol === self }
+  
   func add_rows()
   {
     // Add On-Grid DLX rows

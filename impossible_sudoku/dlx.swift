@@ -17,6 +17,7 @@ class DLX
 {
   let head = DLXHeadNode()
   var solution = Array<DLXRowNode>()
+  var solved = false
 
   let rows : Rows
   let cols : Cols
@@ -62,4 +63,39 @@ class DLX
     }
   }
   
+  func solve(solution_depth:Int=0)
+  {
+    if self.head.solved {
+      show_solution()
+      self.solved = true
+      return
+    }
+  }
+  
+  func show_solution()
+  {
+    var grid = Array<Array<Int>>(repeating: Array<Int>(repeating: 0, count: 9), count: 9)
+    for r in self.solution {
+      if let r = r as? DLXOnGridRow {
+        grid[r.gridRow][r.gridCol] = r.digit
+      }
+    }
+    print("Grid:")
+    for (r,row) in grid.enumerated() {
+      let digits = row.reduce("") { (r, d) -> String in r + " \(d)" }
+      let cages = (0..<9).reduce("") { (s, c) -> String in
+        if let cage = cageDef[r][c] { return "\(s) \(cageLabels[cage])" }
+        return "\(s)  "
+      }
+      print("  \(digits)  \(cages)")
+    }
+    
+    var extra = "\nExtra:"
+    for r in self.solution {
+      if let r = r as? DLXOffGridRow {
+        extra = extra + " \(r.label)"
+      }
+    }
+    print(extra)
+  }
 }

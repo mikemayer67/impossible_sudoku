@@ -50,6 +50,8 @@ import Foundation
 let dlx = DLX()
 
 dlx.add_given(row: 6, col: 3, digit: 2)
+dlx.show_solution()
+dlx.solve()
 
 /*
 print("---------")
