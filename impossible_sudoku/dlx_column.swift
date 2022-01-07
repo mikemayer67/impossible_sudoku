@@ -53,14 +53,11 @@ class DLXColumnNode : DLXNode
   
   func cover()
   {
-    print("Cover column: \(self.label)")
     self.unlink(.Col)
     for r in ColNodes(self) {
-      print(" Cover (row): \(r.row.label)")
       r.row.unlink(.Row)
       for c in RowNodes(r.row) {
         if c !== r {
-          print("  Cover (node): \(c.label)")
           c.unlink(.Row)
           c.column.nrows -= 1
         }

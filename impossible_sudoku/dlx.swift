@@ -41,19 +41,25 @@ class DLX
     }
   }
   
-  func add_to_solution(_ row:DLXRowNode)
+  func add_given(row:Int, col:Int, digit:Int)
   {
-    print("Add to Solution: \(row.label)")
-    self.solution.append(row)
-    
-    for r in row.incompatible {
-      if r.hide() {
-        row.hiding.append(r)
+    for r in self.rows {
+      if r.digit == digit,
+         let r = r as? DLXOnGridRow,
+         r.gridRow == row,
+         r.gridCol == col
+      {
+        self.solution.append(r)
+        r.incompatible.forEach { ir in
+          if ir.hide() {
+            r.hiding.append(ir)
+          }
+        }
+        RowNodes(r).forEach {
+          node in node.column.cover()
+        }
       }
     }
-    
-    for node in RowNodes(row) {
-      node.column.cover()
-    }
   }
+  
 }

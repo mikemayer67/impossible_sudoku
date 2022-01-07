@@ -49,31 +49,28 @@ import Foundation
 // DLX Head Node
 let dlx = DLX()
 
-for r in dlx.rows {
-  if r.digit == 2,
-     let x = r as? DLXOnGridRow,
-     x.gridRow == 6,
-     x.gridCol == 3
-  {
-    dlx.add_to_solution(r)
-    break
-  }
-}
+dlx.add_given(row: 6, col: 3, digit: 2)
 
+/*
 print("---------")
 for (i,r) in dlx.rows.enumerated() {
-  let incomp = r.incompatible.reduce("|") {
+  let incomp = r.incompatible.reduce("") {
     (r,n) -> String in
     r + " " + n.label
   }
-  let hiding = r.hiding.reduce("|") {
+  let hiding = r.hiding.reduce("") {
    (r,n) -> String in
    r + " " + n.label
  }
-  print("DLXRow \(i+1): \(r.label) \(incomp) \(hiding)")
+  print("DLXRow \(i+1): \(r.label)  [\(incomp) |\(hiding) ]")
 }
 print("---------")
 for (i,c) in dlx.cols.enumerated() {
-  print("DLXCol \(i+1): \(c.label) [\(c.nrows)]")
+  let nodes = ColNodes(c).reduce("") {
+    (r,n) -> String in
+    r + " " + n.row.label
+  }
+  print("DLXCol \(i+1): \(c.label) [\(c.nrows):\(nodes)]")
 }
 print("---------")
+*/
