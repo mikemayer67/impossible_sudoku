@@ -12,6 +12,8 @@ enum DLXColumnType {
   case GridCol
   case GridBox
   case Cage
+  case GridCell
+  case CageCell
 }
 
 class DLXColumnNode : DLXNode
@@ -42,6 +44,12 @@ class DLXColumnNode : DLXNode
     super.init(label: "B\(index)=\(digit)")
   }
   
+  init(gridRow:Int, gridCol:Int) {
+    self.type = DLXColumnType.GridCell
+    self.index = 9*gridRow + gridCol
+    super.init(label: "B\(index)=\(digit)")
+  }
+  
   init(cage:Int, digit:Int)
   {
     self.type = DLXColumnType.Cage
@@ -55,13 +63,25 @@ class DLXColumnNode : DLXNode
   {
     self.unlink(.Col)
     for r in ColNodes(self) {
- //     r.row.unlink(.Row)
-      for c in RowNodes(r.row) {
-        if c !== r {
-          c.unlink(.Row)
-          c.column.nrows -= 1
+      for node in RowNodes(r.row) {
+        if node !== r {
+          node.unlink(.Row)
+          node.column.nrows -= 1
         }
       }
     }
+  }
+  
+  func uncover()
+  {
+    for r in ColNodes(self,reverse: true) {
+      for node in RowNodes(r.row, reverse: true) {
+        if node !== r {
+          node.relink(.Row)
+          node.column.nrows += 1
+        }
+      }
+    }
+    self.relink(.Col)
   }
 }

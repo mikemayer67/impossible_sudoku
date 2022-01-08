@@ -36,11 +36,30 @@ class DLXRowNode : DLXNode
     return true
   }
   
+  func unhide()
+  {
+    guard hidden else { return }
+    hidden = false
+    for node in RowNodes(self, reverse: true) {
+      node.relink(.Row)
+      node.column.nrows += 1
+    }
+    self.relink(.Row)
+  }
+  
   func hide_incompatible()
   {
-    for r in incompatible {
+    for r in self.incompatible {
       if r.hide() { self.hiding.append(r) }
     }
+  }
+  
+  func unhide_hidden()
+  {
+    for r in self.hiding.reversed() {
+      r.unhide()
+    }
+    self.hiding.removeAll()
   }
 }
 

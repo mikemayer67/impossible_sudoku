@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2711C495278902C8003C21E4 /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2711C494278902C8003C21E4 /* debug.swift */; };
 		272211582785493800D676F4 /* dlx_cover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272211572785493800D676F4 /* dlx_cover.swift */; };
 		2722115B278733C700D676F4 /* dlx.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2722115A278733C700D676F4 /* dlx.swift */; };
 		2722116327874DC800D676F4 /* sequences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2722116227874DC800D676F4 /* sequences.swift */; };
@@ -31,6 +32,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2711C494278902C8003C21E4 /* debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = debug.swift; sourceTree = "<group>"; };
 		272211572785493800D676F4 /* dlx_cover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dlx_cover.swift; sourceTree = "<group>"; };
 		2722115A278733C700D676F4 /* dlx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dlx.swift; sourceTree = "<group>"; };
 		2722116227874DC800D676F4 /* sequences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sequences.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				27496B72277EBCB90042A11B /* main.swift */,
+				2711C494278902C8003C21E4 /* debug.swift */,
 				27496B8727802D410042A11B /* cages.swift */,
 				2722115A278733C700D676F4 /* dlx.swift */,
 				27496B7C277EBE160042A11B /* dlx_node.swift */,
@@ -148,6 +151,7 @@
 				2722116327874DC800D676F4 /* sequences.swift in Sources */,
 				27537A372784DF5D00641795 /* dlx_column.swift in Sources */,
 				27496B8827802D410042A11B /* cages.swift in Sources */,
+				2711C495278902C8003C21E4 /* debug.swift in Sources */,
 				2722115B278733C700D676F4 /* dlx.swift in Sources */,
 				27496B80277F523F0042A11B /* dlx_row.swift in Sources */,
 				272211582785493800D676F4 /* dlx_cover.swift in Sources */,

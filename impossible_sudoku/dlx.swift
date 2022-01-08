@@ -73,7 +73,10 @@ class DLX
       if c == nil { c = cand }
       else if cand.nrows < c.nrows { c = cand }
     }
-    guard c.nrows > 0 else { return }
+    guard c.nrows > 0 else {
+      print("No solutions for \(c.label)")
+      return
+    }
     
     print("Solve(\(solution_depth)) c:\(c.label) [\(c.nrows)]")
     
@@ -83,11 +86,22 @@ class DLX
       solution.append(r.row)
       r.row.hide_incompatible()
       show_solution()
-      RowNodes(r.row).forEach() { if $0 !== r { $0.column.cover() } }
+      
+      for node in RowNodes(r.row) {
+        if node !== r {
+          node.column.cover()
+        }
+      }
       
       solve(solution_depth + 1)
       
-      print("@@@ Add uncover steps")
+      for node in RowNodes(r.row,reverse: true) {
+        if node !== r {
+          node.column.uncover()
+        }
+      }
+      r.row.unhide_hidden()
+            
       solution.removeLast()
     }
   }
@@ -117,5 +131,6 @@ class DLX
       }
     }
     print(extra)
+    print()
   }
 }
