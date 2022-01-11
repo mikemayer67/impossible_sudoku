@@ -68,25 +68,41 @@ class DLXHeadNode : DLXNode
     // Add DLX columns covering Sudoku grid rows
     for r in 0..<9 {
       for d in 1...9 {
-        self.add(prevCol: DLXColumnNode(gridRow: r, digit: d))
+        self.add(prevCol: DLXRowColumn(gridRow: r, digit: d))
       }
     }
     // Add DLX columns covering Sudoku grid columns
     for c in 0..<9 {
       for d in 1...9 {
-        self.add(prevCol: DLXColumnNode(gridCol: c, digit: d))
+        self.add(prevCol: DLXColumnColumn(gridCol: c, digit: d))
       }
     }
     // Add DLX columns covering Sudoku grid boxes
-    for b in 0..<9 {
-      for d in 1...9 {
-        self.add(prevCol: DLXColumnNode(gridBox: b, digit: d))
+    for r in 0..<3 {
+      for c in 0..<3 {
+        for d in 1...9 {
+          self.add(prevCol: DLXBoxColumn(boxRow: r, boxCol: c, digit: d))
+        }
       }
     }
     // Add DLX columns covering Sudoku cages
     for cage in cageIndicies {
       for d in 1...9 {
-        self.add(prevCol: DLXColumnNode(cage: cage, digit: d))
+        self.add(prevCol: DLXCageColumn(cage: cage, digit: d))
+      }
+    }
+    // Add DLX columns for unique cell entry
+    for r in 0..<9 {
+      for c in 0..<9 {
+        self.add(prevCol: DLXGridCellColumn(gridRow: r, gridCol: c))
+      }
+    }
+    for (cage,coords) in cageCoords {
+      let ncells = 9 - coords.count
+      if ncells > 0 {
+         for i in 0..<ncells {
+          self.add(prevCol: DLXCageCellColumn(cage: cage, index: i))
+        }
       }
     }
   }

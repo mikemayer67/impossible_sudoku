@@ -19,20 +19,17 @@ class DLX
   var solution = Array<DLXRowNode>()
   var solved = false
 
-  let rows : Rows
-  let cols : Cols
+  var rows : Rows { Rows(head) }
+  var cols : Cols { Cols(head) }
   
   init()
   {
     head.add_rows()
     head.add_cols()
     
-    self.rows = Rows(head)
-    self.cols = Cols(head)
-    
     for row in self.rows {
       for col in self.cols {
-        if row.covers(column:col) {
+        if col.coveredBy(row: row) {
           col.nrows += 1
           let x = DLXCoverNode(row: row, column: col)
           x.insert(before: row)
@@ -74,24 +71,24 @@ class DLX
       else if cand.nrows < c.nrows { c = cand }
     }
     guard c.nrows > 0 else {
-      print("No solutions for \(c.label)")
+      print("\(solution_depth): No solutions for \(c.label) [\(c.nrows)]")
       return
     }
     
-    print("Solve(\(solution_depth)) c:\(c.label) [\(c.nrows)]")
+    print("\(solution_depth): Solve \(c.label) [\(c.nrows)]")
     
     c.cover()
     for r in ColNodes(c) {
-      print("Try row \(r.row.label)")
+      print("  \(solution_depth): Solving for \(c.label):  Try row \(r.row.label)")
       solution.append(r.row)
       r.row.hide_incompatible()
-      show_solution()
-      
       for node in RowNodes(r.row) {
         if node !== r {
           node.column.cover()
         }
       }
+      
+      show_solution()
       
       solve(solution_depth + 1)
       

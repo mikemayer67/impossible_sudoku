@@ -7,14 +7,14 @@
 
 import Foundation
 
-func src()
+func show_all()
 {
-  sr()
-  sc()
+  show_rows()
+  show_cols()
   print("---------")
 }
   
-func sc()
+func show_cols()
 {
   print("---------")
   for (i,c) in dlx.cols.enumerated() {
@@ -26,7 +26,7 @@ func sc()
   }
 }
 
-func sr()
+func show_rows()
 {
   print("---------")
   for (i,r) in dlx.rows.enumerated() {
@@ -41,23 +41,3 @@ func sr()
     print("DLXRow \(i+1): \(r.label)  [\(incomp) |\(hiding) ]")
   }
 }
-
-func show_dlx(type:DLXColumnType, index:Int, digit:Int?=nil)
-{
-  var found = false
-  for c in dlx.cols {
-    if c.type == type, c.index == index {
-      if digit == nil || c.digit == digit {
-        let rows = ColNodes(c).reduce("") { (s, n) -> String in s + " \(n.row.label)" }
-        print(" found \(c.label) [\(c.nrows)]: \(rows)")
-        found = true
-      }
-    }
-  }
-  if !found { print(" not found") }
-}
-
-func show_dlx(col:Int, digit:Int?=nil) { show_dlx(type: .GridCol, index:col, digit: digit) }
-func show_dlx(row:Int, digit:Int?=nil) { show_dlx(type: .GridRow, index:row, digit: digit) }
-func show_dlx(box:Int, digit:Int?=nil) { show_dlx(type: .GridBox, index:box, digit: digit) }
-func show_dlx(cage:Int, digit:Int?=nil) { show_dlx(type: .Cage, index:cage, digit: digit) }

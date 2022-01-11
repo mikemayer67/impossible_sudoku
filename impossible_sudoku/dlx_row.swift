@@ -22,8 +22,6 @@ class DLXRowNode : DLXNode
     super.init(label:label)
   }
   
-  func covers(column:DLXColumnNode) -> Bool { return false }
-  
   func hide() -> Bool
   {
     guard !hidden else { return false }
@@ -90,26 +88,6 @@ class DLXOnGridRow : DLXRowNode
       other.incompatible.append(self)
     }
   }
-  
-  override func covers(column:DLXColumnNode) -> Bool
-  {
-    guard self.digit == column.digit else { return false }
-    
-    switch column.type {
-    case .GridRow:
-      return self.gridRow == column.index
-    case .GridCol:
-      return self.gridCol == column.index
-    case .GridBox:
-      let boxRow : Int = self.gridRow / 3
-      let boxCol : Int = self.gridCol / 3
-      let boxIndex = 3*boxRow + boxCol
-      return boxIndex == column.index
-    case .Cage:
-      guard let cage = cageDef[self.gridRow][self.gridCol] else { return false }
-      return cage == column.index
-    }
-  }
 }
 
 class DLXOffGridRow : DLXRowNode
@@ -117,13 +95,13 @@ class DLXOffGridRow : DLXRowNode
   /// Represents placing a given digit in an off-grid cell.
   /// Used to complete cages with less than 9 cells on the Sudoku grid
   let cage : Int
-  let cageIndex : Int
+  let index : Int
   
   init(cage:Int, index:Int, digit:Int)
   {
     self.cage = cage
-    self.cageIndex = index
-    super.init(label:"\(cageLabels[cage])\(cageIndex):\(digit)", digit:digit)
+    self.index = index
+    super.init(label:"\(cageLabels[cage])\(index):\(digit)", digit:digit)
   }
 
   override func test_compatibility(with other:DLXNode)
@@ -131,27 +109,15 @@ class DLXOffGridRow : DLXRowNode
     // only need to test other off-grid cells for same cage
     guard let other = other as? DLXOffGridRow,
           self.cage == other.cage,
-          self.cageIndex != other.cageIndex
+          self.index != other.index
           else { return }
     
-    if self.cageIndex < other.cageIndex,
+    if self.index < other.index,
        self.digit < other.digit { return }
-    if self.cageIndex > other.cageIndex,
+    if self.index > other.index,
        self.digit > other.digit { return }
     
     self.incompatible.append(other)
     other.incompatible.append(self)
-  }
-  
-  override func covers(column:DLXColumnNode) -> Bool
-  {
-    guard self.digit == column.digit else { return false }
-    
-    switch column.type {
-    case .Cage:
-      return self.cage == column.index
-    default:
-      return false
-    }
   }
 }
