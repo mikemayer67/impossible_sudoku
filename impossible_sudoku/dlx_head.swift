@@ -9,6 +9,8 @@ import Foundation
 
 class DLXHeadNode : DLXNode
 {
+  private(set) var rows = Array<DLXRow>()
+  
   init() {
     super.init(label:"DLX Head")
   }
@@ -22,17 +24,18 @@ class DLXHeadNode : DLXNode
     //  9 sudoku rows x 9 sudoku columns x 9 digits
     for r in 0..<9 {
       for c in 0..<9 {
-        for d in 1...9 {
-          self.add(prevRow:DLXOnGridRow(gridRow: r, gridCol: c, digit: d))
+        for digit in 1...9 {
+          rows.append(DLXOnGridRow(gridRow: r, gridCol: c, digit: digit))
         }
       }
     }
     
     // Add grid incompatibilites
     // No adjacent sudoku cells may contain subsequent digits
-    for a in Rows(self) {
-      for b in Rows(a) {
-        a.test_compatibility(with: b)
+    for i in 0..<rows.count-1 {
+    let row = rows[i]
+      for j in i+1..<rows.count {
+        row.test_compatibility(with: rows[j])
       }
     }
     
@@ -45,19 +48,20 @@ class DLXHeadNode : DLXNode
     for cage in cageIndicies {
       guard let coords = cageCoords[cage] else { continue }
       
-      let mark = self.prevRow!
+      let mark = rows.count
       let ncoord = coords.count
       if ncoord == 9 { continue }
       let needed = 9 - ncoord
       for i in 0..<needed {
         for digit in 1+i...10-needed+i {
-          self.add(prevRow: DLXOffGridRow(cage:cage, index:i, digit:digit))
+          rows.append(DLXOffGridRow(cage:cage, index:i, digit:digit))
         }
       }
-      if needed == 1 { continue }
-      for a in Rows(mark) {
-        for b in Rows(a) {
-          a.test_compatibility(with: b)
+      
+      for i in mark..<rows.count-1 {
+        let row = rows[i]
+        for j in i+1..<rows.count {
+          row.test_compatibility(with: rows[j])
         }
       }
     }

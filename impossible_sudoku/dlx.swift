@@ -16,11 +16,11 @@ enum GridDimension
 class DLX
 {
   let head = DLXHeadNode()
-  var solution = Array<DLXRowNode>()
+  var solution = Array<DLXRow>()
   var solved = false
 
-  var rows : Rows { Rows(head) }
   var cols : Cols { Cols(head) }
+  var rows : Array<DLXRow> { head.rows }
   
   init()
   {
@@ -32,7 +32,7 @@ class DLX
         if col.coveredBy(row: row) {
           col.nrows += 1
           let x = DLXCoverNode(row: row, column: col)
-          x.insert(before: row)
+          row.add(x)
           x.insert(above: col)
         }
       }
@@ -78,24 +78,20 @@ class DLX
     print("\(solution_depth): Solve \(c.label) [\(c.nrows)]")
     
     c.cover()
-    for r in ColNodes(c) {
+    for r in Rows(c) {
       print("  \(solution_depth): Solving for \(c.label):  Try row \(r.row.label)")
       solution.append(r.row)
       r.row.hide_incompatible()
-      for node in RowNodes(r.row) {
-        if node !== r {
-          node.column.cover()
-        }
+      for node in RowNodes(r) {
+        node.column.cover()
       }
       
       show_solution()
       
       solve(solution_depth + 1)
       
-      for node in RowNodes(r.row,reverse: true) {
-        if node !== r {
-          node.column.uncover()
-        }
+      for node in RowNodes(r,reverse: true) {
+        node.column.uncover()
       }
       r.row.unhide_hidden()
             

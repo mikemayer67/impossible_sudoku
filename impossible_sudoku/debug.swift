@@ -18,7 +18,7 @@ func show_cols()
 {
   print("---------")
   for (i,c) in dlx.cols.enumerated() {
-    let nodes = ColNodes(c).reduce("") {
+    let nodes = Rows(c).reduce("") {
       (r,n) -> String in
       r + " " + n.row.label
     }
@@ -38,6 +38,6 @@ func show_rows()
      (r,n) -> String in
      r + " " + n.label
    }
-    print("DLXRow \(i+1): \(r.label)  [\(incomp) |\(hiding) ]")
+    print("DLXRow \(i+1): \(r.label)  \(r.hidden ? "X" : " ") [\(incomp) |\(hiding) ]")
   }
 }

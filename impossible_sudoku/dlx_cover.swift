@@ -9,10 +9,10 @@ import Foundation
 
 class DLXCoverNode : DLXNode
 {
-  let row : DLXRowNode
+  let row : DLXRow
   let column : DLXColumnNode
   
-  init(row:DLXRowNode, column:DLXColumnNode)
+  init(row:DLXRow, column:DLXColumnNode)
   {
     self.row = row
     self.column = column

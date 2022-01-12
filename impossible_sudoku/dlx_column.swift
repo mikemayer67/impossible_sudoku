@@ -23,7 +23,7 @@ class DLXColumnNode : DLXNode
       }
     }
   }
-  func coveredBy(row:DLXRowNode) -> Bool {
+  func coveredBy(row:DLXRow) -> Bool {
     fatalError("Coding error... this is an abstract method")
   }
   
@@ -31,14 +31,12 @@ class DLXColumnNode : DLXNode
   {
 //    print("  cover col \(self.label) [\(self.nrows)]")
     self.unlink(.Col)
-    for r in ColNodes(self) {
+    for r in Rows(self) {
 //      print("   cover row \(r.row.label) [\(r.label)]")
-      for node in RowNodes(r.row) {
-        if node !== r {
-//          print("    unlink node\(node.label)")
-          node.unlink(.Row)
-          node.column.nrows -= 1
-        }
+      for node in RowNodes(r) {
+//        print("    unlink node\(node.label)")
+        node.unlink(.Row)
+        node.column.nrows -= 1
       }
     }
   }
@@ -46,14 +44,12 @@ class DLXColumnNode : DLXNode
   func uncover()
   {
 //    print("  uncover col \(self.label)")
-    for r in ColNodes(self,reverse: true) {
+    for r in Rows(self,reverse: true) {
 //      print ("  uncover row \(r.row.label) [\(r.label)]")
-      for node in RowNodes(r.row, reverse: true) {
-        if node !== r {
-//          print("  relink node\(node.label)")
-          node.relink(.Row)
-          node.column.nrows += 1
-        }
+      for node in RowNodes(r, reverse: true) {
+//        print("  relink node\(node.label)")
+        node.relink(.Row)
+        node.column.nrows += 1
       }
     }
     self.relink(.Col)
@@ -70,7 +66,7 @@ class DLXRowColumn : DLXColumnNode
     self.digit = digit
     super.init(label:"R\(gridRow)=\(digit)")
   }
-  override func coveredBy(row:DLXRowNode) -> Bool {
+  override func coveredBy(row:DLXRow) -> Bool {
     if row.digit != self.digit { return false }
     guard let row = row as? DLXOnGridRow else { return false }
     return  row.gridRow == self.gridRow
@@ -87,7 +83,7 @@ class DLXColumnColumn : DLXColumnNode
     self.digit = digit
     super.init(label:"C\(gridCol)=\(digit)")
   }
-  override func coveredBy(row:DLXRowNode) -> Bool {
+  override func coveredBy(row:DLXRow) -> Bool {
     if row.digit != self.digit { return false }
     guard let row = row as? DLXOnGridRow else { return false }
     return row.gridCol == self.gridCol
@@ -106,7 +102,7 @@ class DLXBoxColumn : DLXColumnNode
     self.digit = digit
     super.init(label:"B\(boxRow)\(boxCol)=\(digit)")
   }
-  override func coveredBy(row:DLXRowNode) -> Bool {
+  override func coveredBy(row:DLXRow) -> Bool {
     if row.digit != self.digit { return false }
     guard let row = row as? DLXOnGridRow else { return false }
     if row.gridCol / 3 != self.boxCol { return false }
@@ -125,7 +121,7 @@ class DLXCageColumn : DLXColumnNode
     self.digit = digit
     super.init(label:"\(cageLabels[cage])=\(digit)")
   }
-  override func coveredBy(row:DLXRowNode) -> Bool {
+  override func coveredBy(row:DLXRow) -> Bool {
     if row.digit != self.digit { return false }
     if let row = row as? DLXOnGridRow {
       return cageDef[row.gridRow][row.gridCol] == cage
@@ -147,7 +143,7 @@ class DLXGridCellColumn : DLXColumnNode
     self.gridCol = gridCol
     super.init(label:"[\(gridRow)\(gridCol)]")
   }
-  override func coveredBy(row:DLXRowNode) -> Bool {
+  override func coveredBy(row:DLXRow) -> Bool {
     guard let row = row as? DLXOnGridRow else { return false }
     if row.gridRow != self.gridRow { return false }
     if row.gridCol != self.gridCol { return false }
@@ -165,7 +161,7 @@ class DLXCageCellColumn : DLXColumnNode
     self.index = index
     super.init(label:"[\(cageLabels[cage])\(index)]")
   }
-  override func coveredBy(row:DLXRowNode) -> Bool {
+  override func coveredBy(row:DLXRow) -> Bool {
     guard let row = row as? DLXOffGridRow else { return false }
     if row.cage != self.cage { return false }
     if row.index != self.index { return false }

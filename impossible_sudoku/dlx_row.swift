@@ -7,30 +7,41 @@
 
 import Foundation
 
-class DLXRowNode : DLXNode
+class DLXRow
 {
   /// Represents placing a given digit in a given solution cell
+  let label : String
   let digit : Int
   
+  var firstNode : DLXCoverNode?
+  
   var hidden = false
-  var incompatible = Array<DLXRowNode>()
-  var hiding = Array<DLXRowNode>()
+  var incompatible = Array<DLXRow>()
+  var hiding = Array<DLXRow>()
   
   init(label:String, digit:Int)
   {
+    self.label = label
     self.digit = digit
-    super.init(label:label)
+  }
+  
+  func add(_ node:DLXCoverNode) {
+    if firstNode == nil {
+      firstNode = node
+    } else {
+      node.insert(before: firstNode)
+    }
   }
   
   func hide() -> Bool
   {
     guard !hidden else { return false }
-    self.unlink(.Row)
+    hidden = true
+    
     for node in RowNodes(self) {
       node.unlink(.Row)
       node.column.nrows -= 1
     }
-    hidden = true
     return true
   }
   
@@ -38,12 +49,14 @@ class DLXRowNode : DLXNode
   {
     guard hidden else { return }
     hidden = false
-    for node in RowNodes(self, reverse: true) {
+    
+    for node in RowNodes(self) {
       node.relink(.Row)
       node.column.nrows += 1
     }
-    self.relink(.Row)
   }
+  
+  func test_compatibility(with other:DLXRow) {}
   
   func hide_incompatible()
   {
@@ -61,7 +74,7 @@ class DLXRowNode : DLXNode
   }
 }
 
-class DLXOnGridRow : DLXRowNode
+class DLXOnGridRow : DLXRow
 {
   /// Represents placing a given digit in a given Sudoku grid cell
   let gridRow : Int
@@ -74,7 +87,7 @@ class DLXOnGridRow : DLXRowNode
     super.init(label:"\(gridRow)\(gridCol):\(digit)", digit:digit)
   }
   
-  override func test_compatibility(with other:DLXNode)
+  override func test_compatibility(with other:DLXRow)
   {
     guard let other = other as? DLXOnGridRow else { return }
     
@@ -90,7 +103,7 @@ class DLXOnGridRow : DLXRowNode
   }
 }
 
-class DLXOffGridRow : DLXRowNode
+class DLXOffGridRow : DLXRow
 {
   /// Represents placing a given digit in an off-grid cell.
   /// Used to complete cages with less than 9 cells on the Sudoku grid
@@ -104,7 +117,7 @@ class DLXOffGridRow : DLXRowNode
     super.init(label:"\(cageLabels[cage])\(index):\(digit)", digit:digit)
   }
 
-  override func test_compatibility(with other:DLXNode)
+  override func test_compatibility(with other:DLXRow)
   {
     // only need to test other off-grid cells for same cage
     guard let other = other as? DLXOffGridRow,

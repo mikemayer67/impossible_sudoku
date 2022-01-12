@@ -103,6 +103,4 @@ class DLXNode {
       prevCol.nextCol = self
     }
   }
-  
-  func test_compatibility(with other:DLXNode) {}
 }
