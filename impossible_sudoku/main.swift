@@ -46,9 +46,12 @@ import Foundation
 //     - 1: sorted off-grid cells: (cage=F1,digit=7) and (cage=F2,digit=4)
 //     - 2: subsequent digits in adjacent cells: (row=8,col=7,digit=6) and (row=8,col=6,digit=5)
 
+let debug_on = false
+let watching = ["C8=3","J=3","46:3"]
+
 // DLX Head Node
 let dlx = DLX()
 
 dlx.add_given(row: 6, col: 3, digit: 2)
-show_all()
+//show_all()
 dlx.solve()

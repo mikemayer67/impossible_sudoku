@@ -13,13 +13,10 @@ class DLXColumnNode : DLXNode
   {
     didSet {
       if self.nrows < 0 {
-        print("Reduced number of rows covering \(self.label) to \(self.nrows)")
+        fatalError("Reduced number of rows covering \(self.label) to \(self.nrows)")
       }
-      if let x = self as? DLXBoxColumn,
-         x.boxRow == 1,
-         x.boxCol == 2,
-         x.digit == 2 {
-        print("Reduced \(x.label) to \(x.nrows)")
+      if watching.contains(self.label) {
+        debug("ADJUSTING \(self.label) from \(oldValue) to \(self.nrows)")
       }
     }
   }
@@ -29,12 +26,18 @@ class DLXColumnNode : DLXNode
   
   func cover()
   {
-//    print("  cover col \(self.label) [\(self.nrows)]")
+    let covering = Rows(self).reduce("") { (r, n) -> String in "\(r) \(n.row.label)" }
+    debug("  cover col \(self.label) [\(self.nrows)] : \(covering)")
     self.unlink(.Col)
     for r in Rows(self) {
-//      print("   cover row \(r.row.label) [\(r.label)]")
+      r.row.hidden = true
+      
+      let covering = RowNodes(r).reduce("") { (r, n) -> String in "\(r) \(n.column.label)" }
+      debug("   cover row \(r.row.label) [\(r.label)] : \(covering)")
       for node in RowNodes(r) {
-//        print("    unlink node\(node.label)")
+        if watching.contains(node.column.label) {
+          debug("    unlink \(node.label)")
+        }
         node.unlink(.Row)
         node.column.nrows -= 1
       }
@@ -43,14 +46,19 @@ class DLXColumnNode : DLXNode
   
   func uncover()
   {
-//    print("  uncover col \(self.label)")
+    let uncovering = Rows(self).reduce("") { (r, n) -> String in "\(r) \(n.row.label)" }
+    debug("  uncover col \(self.label) : \(uncovering)")
     for r in Rows(self,reverse: true) {
-//      print ("  uncover row \(r.row.label) [\(r.label)]")
+      let uncovering = RowNodes(r).reduce("") { (r, n) -> String in "\(r) \(n.column.label)" }
+      debug ("   uncover row \(r.row.label) [\(r.label)] : \(uncovering)")
       for node in RowNodes(r, reverse: true) {
-//        print("  relink node\(node.label)")
+        if watching.contains(node.column.label) {
+          debug("    relink \(node.label)")
+        }
         node.relink(.Row)
         node.column.nrows += 1
       }
+      r.row.hidden = false
     }
     self.relink(.Col)
   }

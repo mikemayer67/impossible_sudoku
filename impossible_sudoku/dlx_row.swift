@@ -38,7 +38,11 @@ class DLXRow
     guard !hidden else { return false }
     hidden = true
     
+    debug("    hide row \(self.label)")
     for node in RowNodes(self) {
+      if watching.contains(node.column.label) {
+        debug("     hide \(self.label) unlink \(node.label)")
+      }
       node.unlink(.Row)
       node.column.nrows -= 1
     }
@@ -49,8 +53,11 @@ class DLXRow
   {
     guard hidden else { return }
     hidden = false
-    
+    debug("    unhide row \(self.label)")
     for node in RowNodes(self) {
+      if watching.contains(node.column.label) {
+        debug("     unhide \(self.label) relink node \(node.label)")
+      }
       node.relink(.Row)
       node.column.nrows += 1
     }
@@ -60,6 +67,7 @@ class DLXRow
   
   func hide_incompatible()
   {
+    debug("  hiding incompatible to \(self.label)")
     for r in self.incompatible {
       if r.hide() { self.hiding.append(r) }
     }
@@ -67,6 +75,7 @@ class DLXRow
   
   func unhide_hidden()
   {
+    debug("  unhiding incompatible to \(self.label)")
     for r in self.hiding.reversed() {
       r.unhide()
     }

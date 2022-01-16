@@ -56,12 +56,12 @@ class DLX
     }
   }
   
-  func solve(_ solution_depth:Int=0)
+  func solve(_ solution_depth:Int=0) -> Bool
   {
     if self.head.solved {
       show_solution()
       self.solved = true
-      return
+      return true
     }
     
     //pick column
@@ -72,10 +72,10 @@ class DLX
     }
     guard c.nrows > 0 else {
       print("\(solution_depth): No solutions for \(c.label) [\(c.nrows)]")
-      return
+      return false
     }
     
-    print("\(solution_depth): Solve \(c.label) [\(c.nrows)]")
+    debug("\(solution_depth): Solve \(c.label) [\(c.nrows)]")
     
     c.cover()
     for r in Rows(c) {
@@ -86,9 +86,9 @@ class DLX
         node.column.cover()
       }
       
-      show_solution()
+      if debug_on { show_solution() }
       
-      solve(solution_depth + 1)
+      if solve(solution_depth + 1) { return true }
       
       for node in RowNodes(r,reverse: true) {
         node.column.uncover()
@@ -96,7 +96,11 @@ class DLX
       r.row.unhide_hidden()
             
       solution.removeLast()
+      if debug_on { show_solution() }
     }
+    c.uncover()
+    
+    return false
   }
   
   func show_solution()

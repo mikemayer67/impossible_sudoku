@@ -37,7 +37,7 @@ class Rows : Sequence {
       defer {
         switch self.reverse {
         case false: cur = cur?.nextRow as? Element
-        case true:  cur = cur?.nextRow as? Element
+        case true:  cur = cur?.prevRow as? Element
         }
       }
       return cur
@@ -48,9 +48,11 @@ class Rows : Sequence {
 class RowNodes : Sequence {
   typealias Element = DLXCoverNode
   let firstNode : Element?
+  let lastNode : Element?
   let reverse : Bool
   init(_ rowNode:DLXCoverNode, reverse:Bool = false) {
     self.reverse = reverse
+    self.lastNode = rowNode
     switch reverse {
     case false: self.firstNode = rowNode.nextCol as? DLXCoverNode
     case true:  self.firstNode = rowNode.prevCol as? DLXCoverNode
@@ -59,6 +61,7 @@ class RowNodes : Sequence {
   init(_ row:DLXRow) {
     self.reverse = false
     self.firstNode = row.firstNode
+    self.lastNode = row.firstNode
   }
   func makeIterator() -> AnyIterator<Element>  {
     var cur : Element? = self.firstNode
@@ -68,7 +71,7 @@ class RowNodes : Sequence {
         case false: cur = cur?.nextCol as? DLXCoverNode
         case true:  cur = cur?.prevCol as? DLXCoverNode
         }
-        if cur === self.firstNode { cur = nil }
+        if cur === self.lastNode { cur = nil }
       }
       return cur
     }

@@ -7,6 +7,12 @@
 
 import Foundation
 
+func debug(_ s:String) {
+  if debug_on {
+    print(s)
+  }
+}
+
 func show_all()
 {
   show_rows()
