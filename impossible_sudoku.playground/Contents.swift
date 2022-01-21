@@ -1,37 +1,21 @@
 import Foundation
 
-class Node {
-    var data: Int
-    var next: Node?
-    init(data: Int, next: Node?) {
-        self.data = data
-        self.next = next
-    }
+class X {
+  let x : Int
+  init?(_ v:Int) {
+    guard v>0 else { return nil }
+    self.x = v
+  }
 }
 
-class LinkedList: Sequence {
-    typealias Element = Node
-    func next() -> Node? {
-        defer {
-            head = head?.next
-        }
-        return head
-    }
-
-    var head: Node?
-    init(head: Node) {
-        self.head = head
-    }
-    
+if let x1 = X(1) {
+  print(x1.x)
+} else {
+  print("NO X1")
 }
 
-let tail = Node(data: 3, next: nil)
-let mid  = Node(data: 2, next: tail)
-let head = Node(data: 1, next: mid)
-let list = LinkedList(head: head)
-
-print("First Iter")
-for x in list { print(x.data) }
-
-print("\nSecond Iter")
-for x in list { print(x.data) }
+if let x2 = X(0) {
+  print(x2.x)
+} else {
+  print("NO X2")
+}

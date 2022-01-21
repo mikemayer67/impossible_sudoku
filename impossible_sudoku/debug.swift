@@ -13,37 +13,19 @@ func debug(_ s:String) {
   }
 }
 
-func show_all()
+func show_available(_ puzzle:Puzzle)
 {
-  show_rows()
-  show_cols()
-  print("---------")
-}
-  
-func show_cols()
-{
-  print("---------")
-  for (i,c) in dlx.cols.enumerated() {
-    let nodes = Rows(c).reduce("") {
-      (r,n) -> String in
-      r + " " + n.row.label
-    }
-    print("DLXCol \(i+1): \(c.label) [\(c.nrows):\(nodes)]")
+  for cell in puzzle.cells {
+    let available = cell.availableDigits.sorted().reduce("") { (r, d) -> String in "\(r) \(d+1)" }
+    print("Cell \(cell.label): \(available)")
   }
-}
-
-func show_rows()
-{
-  print("---------")
-  for (i,r) in dlx.rows.enumerated() {
-    let incomp = r.incompatible.reduce("") {
-      (r,n) -> String in
-      r + " " + n.label
+  print("-------")
+  for row in puzzle.rows {
+    for digit in 0..<9 {
+      if !row.coveredDigits.contains(digit) {
+        let available = row.availableCells[digit].sorted().reduce("") { (r, c) -> String in "\(r) \(c)" }
+        print("Row \(row.label) - \(digit): \(available)")
+      }
     }
-    let hiding = r.hiding.reduce("") {
-     (r,n) -> String in
-     r + " " + n.label
-   }
-    print("DLXRow \(i+1): \(r.label)  \(r.hidden ? "X" : " ") [\(incomp) |\(hiding) ]")
   }
 }
