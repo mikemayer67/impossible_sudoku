@@ -10,7 +10,7 @@
 		2711C495278902C8003C21E4 /* debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2711C494278902C8003C21E4 /* debug.swift */; };
 		27496B73277EBCB90042A11B /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B72277EBCB90042A11B /* main.swift */; };
 		27496B8827802D410042A11B /* cages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27496B8727802D410042A11B /* cages.swift */; };
-		278F1C762796F970003D4EC2 /* elements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 278F1C752796F970003D4EC2 /* elements.swift */; };
+		278F1C762796F970003D4EC2 /* groups.swift in Sources */ = {isa = PBXBuildFile; fileRef = 278F1C752796F970003D4EC2 /* groups.swift */; };
 		278F1C7A27970985003D4EC2 /* cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 278F1C7927970985003D4EC2 /* cell.swift */; };
 		278F1C7D2797DEBB003D4EC2 /* puzzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 278F1C7C2797DEBB003D4EC2 /* puzzle.swift */; };
 		278F1C81279B046E003D4EC2 /* actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 278F1C80279B046E003D4EC2 /* actions.swift */; };
@@ -33,7 +33,7 @@
 		27496B6F277EBCB90042A11B /* impossible_sudoku */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = impossible_sudoku; sourceTree = BUILT_PRODUCTS_DIR; };
 		27496B72277EBCB90042A11B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		27496B8727802D410042A11B /* cages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cages.swift; sourceTree = "<group>"; };
-		278F1C752796F970003D4EC2 /* elements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = elements.swift; sourceTree = "<group>"; };
+		278F1C752796F970003D4EC2 /* groups.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = groups.swift; sourceTree = "<group>"; };
 		278F1C7927970985003D4EC2 /* cell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = cell.swift; sourceTree = "<group>"; };
 		278F1C7C2797DEBB003D4EC2 /* puzzle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = puzzle.swift; sourceTree = "<group>"; };
 		278F1C80279B046E003D4EC2 /* actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = actions.swift; sourceTree = "<group>"; };
@@ -72,7 +72,7 @@
 				27496B72277EBCB90042A11B /* main.swift */,
 				27496B8727802D410042A11B /* cages.swift */,
 				278F1C7C2797DEBB003D4EC2 /* puzzle.swift */,
-				278F1C752796F970003D4EC2 /* elements.swift */,
+				278F1C752796F970003D4EC2 /* groups.swift */,
 				278F1C7927970985003D4EC2 /* cell.swift */,
 				278F1C80279B046E003D4EC2 /* actions.swift */,
 				2711C494278902C8003C21E4 /* debug.swift */,
@@ -137,7 +137,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				278F1C762796F970003D4EC2 /* elements.swift in Sources */,
+				278F1C762796F970003D4EC2 /* groups.swift in Sources */,
 				278F1C7A27970985003D4EC2 /* cell.swift in Sources */,
 				278F1C7D2797DEBB003D4EC2 /* puzzle.swift in Sources */,
 				27496B8827802D410042A11B /* cages.swift in Sources */,

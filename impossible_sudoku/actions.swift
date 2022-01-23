@@ -19,101 +19,116 @@ protocol Action
 }
 
 typealias Actions = Array<Action>
-typealias CellDigit = (cell:Cell, digit:Int)
 
 struct SetCellDigit : Action
 {
-  // Pretty simple, just sets/clears the digit and nothing else
-  // It leaves availableDigits alone.
+  // There are a number of things that must happen when assigning
+  // a digit to a cell
+  //
+  // Within the cell itself:
+  // - the digit property must be set
+  // - (the available digits can be left alone as non-nil digit signals this cell is complete)
+  //
+  // For each of the cell's groups (row, col, box, cage):
+  // - mark the digit as covered
+  // - remove the cell from all digits' available cell lists
+  //
+  // Within all other cells in each group (row, col, box, cage):
+  // - Remove the digit from the list of available digits
+  // - Remove the cell from each of its groups (row, col, box, cage)
   let cell : Cell
   let digit : Int
   
-  init?(cell:Cell, digit:Int)
+  private(set) var subActions = Actions()
+  
+  init?(puzzle:Puzzle, cell:Cell, digit:Int)
   {
     guard cell.digit == nil else { return nil }
     guard cell.availableDigits.contains(digit) else { return nil }
     self.cell = cell
     self.digit = digit
+    
+    subActions.append(UpdateCellGroup(cell.row, cell:cell, digit:digit))
+    subActions.append(UpdateCellGroup(cell.col, cell:cell, digit:digit))
+    subActions.append(UpdateCellGroup(cell.box, cell:cell, digit:digit))
+    
+    if let cage = cell.cage {
+      subActions.append(UpdateCellGroup(cage, cell:cell, digit:digit))
+    }
+    if let updateNeighbors = UpdateNeighbors(cell:cell, digit: digit)
+    {
+      subActions.append(updateNeighbors)
+    }
   }
   
   func run() {
     cell.digit = digit
+    subActions.forEach { $0.run() }
   }
   
   func undo() {
+    subActions.reversed().forEach { $0.undo() }
     cell.digit = nil
   }
 }
 
-class UpdateBasicElement : Action
+class UpdateCellGroup : Action
 {
-  // This action adds the digit to the set of digits currently covered by
-  // a row, col, box, or cage
-  // It leaves availableCells alone.
-  let element : BasicElement
+  // For each of the cell's groups (row, col, box, cage):
+  // - mark the digit as covered
+  // - remove the cell from all digits' available cell lists
+  //
+  // Within all other cells in each group (row, col, box, cage):
+  // - Remove the digit from the list of available digits
+  // - Remove the cell from each of its groups (row, col, box, cage)
+  
+  let group : CellGroup
+  let cell : Cell
   let digit : Int
   
-  var removeDigit = Array<CellDigit>()
-  
-  init?(_ element:BasicElement, digit: Int)
-  {
-    if element.coveredDigits.contains(digit) { return nil }
+  let digitsWithCell : Array<Int>
+  let cellsWithDigit : Array<Cell>
     
-    self.element = element
+  init(_ group:CellGroup, cell:Cell, digit:Int)
+  {
+    if group.coveredDigits.contains(digit) { fatalError("should never get here") }
+    
+    self.group = group
+    self.cell = cell
     self.digit = digit
     
-    for index in element.availableCells[digit]
-    {
-      let cell = puzzle.cells[index]
-      if cell.availableDigits.contains(digit) {
-        removeDigit.append((cell,digit))
-      }
-    }
+    self.digitsWithCell = Array(0..<9)
+      .filter { $0 != digit }
+      .filter { group.availableCells[$0].contains(cell) }
+    
+    self.cellsWithDigit = group.availableCells[digit]
+      .filter { $0 != cell }
   }
   func run() {
-    self.element.coveredDigits.insert(self.digit)
-    removeDigit.forEach { (cell,digit) in cell.availableDigits.remove(digit) }
+    group.coveredDigits.insert(digit)
+    
+    digitsWithCell.forEach { group.availableCells[$0].remove(cell) }
+    
+    cellsWithDigit.forEach { cell in
+      cell.availableDigits.remove(digit)
+      cell.row.availableCells[self.digit].remove(cell)
+      cell.col.availableCells[self.digit].remove(cell)
+      cell.box.availableCells[self.digit].remove(cell)
+      cell.cage?.availableCells[self.digit].remove(cell)
+    }
   }
   func undo() {
-    self.element.coveredDigits.remove(self.digit)
-    removeDigit.forEach { (cell,digit) in cell.availableDigits.insert(digit) }
-  }
-}
-
-class UpdateRow : UpdateBasicElement
-{
-  // This action adds the digit to the set of digits currently covered by the row
-  init?(cell:Cell, digit:Int)
-  {
-    super.init(cell.puzzle.rows[cell.row], digit: digit)
-  }
-}
-
-class UpdateColumn : UpdateBasicElement
-{
-  // This action adds the digit to the set of digits currently covered by the column
-  init?(cell:Cell, digit:Int)
-  {
-    super.init(cell.puzzle.cols[cell.col], digit: digit)
-  }
-}
-
-class UpdateBox : UpdateBasicElement
-{
-  // This action adds the digit to the set of digits currently covered by the box
-  init?(cell:Cell, digit:Int)
-  {
-    super.init(cell.puzzle.boxes[cell.box], digit: digit)
-  }
-}
-
-class UpdateCage : UpdateBasicElement
-{
-  // This action adds the digit to the set of digits currently covered by the cage
-  init?(cell:Cell, digit:Int)
-  {
-    if cell.cage == nil { return nil }
-    super.init(cell.puzzle.cages[cell.cage!], digit: digit)
+    cellsWithDigit.reversed().forEach { cell in
+      cell.cage?.availableCells[self.digit].insert(cell)
+      cell.box.availableCells[self.digit].insert(cell)
+      cell.col.availableCells[self.digit].insert(cell)
+      cell.row.availableCells[self.digit].insert(cell)
+      cell.availableDigits.insert(digit)
+    }
+    
+    digitsWithCell.reversed().forEach { group.availableCells[$0].insert(cell) }
+    
+    group.coveredDigits.remove(digit)
   }
 }
 
@@ -123,22 +138,11 @@ struct UpdateNeighbors : Action
   // from neighboring cells.  It keeps track of which candidates were
   // removed so that it can correctly add them back during undo
   
-  var removeDigit = Array<CellDigit>()
+  var removeDigit = Array<(cell:Cell,digit:Int)>()
   
   init?(cell:Cell, digit:Int)
   {
-    let row = cell.row
-    let col = cell.col
-    
-    var neighbors = Array<Cell>()
-    let cells = cell.puzzle.cells
-    
-    if row > 0 { neighbors.append(cells[cellIndex(row: row-1, col: col)]) }
-    if row < 8 { neighbors.append(cells[cellIndex(row: row+1, col: col)]) }
-    if col > 0 { neighbors.append(cells[cellIndex(row: row, col: col-1)]) }
-    if col < 8 { neighbors.append(cells[cellIndex(row: row, col: col+1)]) }
-    
-    neighbors.forEach { neighbor in
+    cell.neighbors.forEach { neighbor in
       if neighbor.availableDigits.contains(digit-1) { removeDigit.append((neighbor,digit-1)) }
       if neighbor.availableDigits.contains(digit+1) { removeDigit.append((neighbor,digit+1)) }
     }
@@ -147,10 +151,22 @@ struct UpdateNeighbors : Action
   }
   
   func run() {
-    removeDigit.forEach { (cell,digit) in cell.availableDigits.remove(digit) }
+    removeDigit.forEach { (cell,digit) in
+      cell.availableDigits.remove(digit)
+      cell.row.availableCells[digit].remove(cell)
+      cell.col.availableCells[digit].remove(cell)
+      cell.box.availableCells[digit].remove(cell)
+      cell.cage?.availableCells[digit].remove(cell)
+    }
   }
   
   func undo() {
-    removeDigit.forEach { (cell,digit) in cell.availableDigits.insert(digit) }
+    removeDigit.forEach { (cell,digit) in
+      cell.cage?.availableCells[digit].insert(cell)
+      cell.box.availableCells[digit].insert(cell)
+      cell.col.availableCells[digit].insert(cell)
+      cell.row.availableCells[digit].insert(cell)
+      cell.availableDigits.insert(digit)
+    }
   }
 }

@@ -50,9 +50,10 @@ import Foundation
 let debug_on = false
 let watching = ["C8=3","J=3","46:3"]
 
-let puzzle = Puzzle()
-puzzle.add(row: 6, col: 3, digit: 1) // remember that our puzzle uses 0-8 rather than 1-9
+let thePuzzle = Puzzle()
+thePuzzle.add(row: 6, col: 3, digit: 1) // remember that our puzzle uses 0-8 rather than 1-9
 
-show_available(puzzle)
+show_state(thePuzzle)
+show_available(thePuzzle)
 
 print("ok")

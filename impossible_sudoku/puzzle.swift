@@ -7,7 +7,7 @@
 
 import Foundation
 
-typealias Move = (row:Int, col:Int, digit:Int)
+typealias Move = (cell:Cell, digit:Int)
 
 func cellIndex(row:Int,col:Int) -> Int { 9*row + col }
 func boxIndex(row:Int,col:Int) -> Int { 3*(row/3) + (col/3) }
@@ -27,10 +27,10 @@ class Puzzle
   init()
   {
     for digit in 0..<9 {
-      rows.append(Row(self,digit))
-      cols.append(Column(self,digit))
-      boxes.append(Box(self,digit))
-      cages.append(Cage(self,digit))
+      rows.append(Row(digit))
+      cols.append(Column(digit))
+      boxes.append(Box(digit))
+      cages.append(Cage(digit))
     }
     for cell in 0..<81 {
       cells.append(Cell(self,cell))
@@ -44,42 +44,16 @@ class Puzzle
   }
   
   @discardableResult
-  func add(row:Int, col:Int, digit:Int) -> Actions?
+  func add(row:Int, col:Int, digit:Int) -> SetCellDigit?
   {
-    return add(cell:cellIndex(row: row, col: col),digit:digit)
+    return add(cell:cells[cellIndex(row: row, col: col)],digit:digit)
   }
   
-  func add(cell cell_index:Int, digit:Int) -> Actions?
+  func add(cell:Cell, digit:Int) -> SetCellDigit?
   {
-    var actions = Array<Action>()
-    
-    let cell = self.cells[cell_index]
-    
-    guard let setDigit = SetCellDigit(cell:cell, digit: digit) else { return nil }
-    actions.append(setDigit)
-    
-    if let addressNeighbors = UpdateNeighbors(cell:cell, digit:digit) {
-      actions.append(addressNeighbors)
-    }
-    
-    guard
-      let updateRow = UpdateRow(cell:cell, digit:digit),
-      let updateCol = UpdateColumn(cell:cell, digit:digit),
-      let updateBox = UpdateBox(cell:cell, digit:digit)
-    else {
-      fatalError("coding logic error")
-    }
-    
-    actions.append(updateRow)
-    actions.append(updateCol)
-    actions.append(updateBox)
-    
-    if let updateCage = UpdateCage(cell:cell, digit:digit) {
-      actions.append(updateCage)
-    }
-    
-    actions.forEach { (action) in action.run() }
-    
-    return actions
+    guard let setCellDigit = SetCellDigit(puzzle:self, cell:cell, digit: digit) else { return nil }
+    solution.append(Move(cell,digit))
+    setCellDigit.run()
+    return setCellDigit
   }
 }
