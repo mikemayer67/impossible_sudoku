@@ -22,6 +22,15 @@ class Cell : Element, Hashable
   
   override var complete: Bool { digit != nil }
   
+  override var candidates: Candidates?
+  {
+    guard digit == nil else {
+      print("No Candidates: \(self.label)")
+      return nil
+    }
+    return availableDigits.map { (self,$0) }
+  }
+  
   init(_ puzzle:Puzzle, _ cell:Int)
   {
     self.cell = cell

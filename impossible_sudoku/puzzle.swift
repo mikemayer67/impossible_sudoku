@@ -7,8 +7,6 @@
 
 import Foundation
 
-typealias Move = (cell:Cell, digit:Int)
-
 func cellIndex(row:Int,col:Int) -> Int { 9*row + col }
 func boxIndex(row:Int,col:Int) -> Int { 3*(row/3) + (col/3) }
 func boxIndex(cell:Int) -> Int { boxIndex(row: cell/9, col: cell%9) }
@@ -22,7 +20,7 @@ class Puzzle
   private(set) var cells = Array<Cell>()
   
   private(set) var elements = Array<Element>()
-  private(set) var solution = Array<Move>()
+  private(set) var solution = Array<CellDigit>()
   
   init()
   {
@@ -52,8 +50,58 @@ class Puzzle
   func add(cell:Cell, digit:Int) -> SetCellDigit?
   {
     guard let setCellDigit = SetCellDigit(puzzle:self, cell:cell, digit: digit) else { return nil }
-    solution.append(Move(cell,digit))
-    setCellDigit.run()
+    solution.append((cell,digit))
     return setCellDigit
+  }
+  
+  @discardableResult
+  func solve() -> Bool
+  {
+    let numFilledCells = self.solution.count
+    if numFilledCells == 81 {
+      show_state()
+      return true
+    }
+    guard let candidates = self.bestCandidates else { return false }
+    
+    let s = candidates.reduce("") { "\($0) \($1.cell.label)=\($1.digit+1)" }
+    show_state()
+
+//    print("CANDIDATES: \(s)")
+    
+    for candidate in candidates {
+//      print("ATTEMPTING: \(candidate.cell.label) = \(candidate.digit+1)")
+      breakpoint(on:candidate.cell.label)
+      guard let attempt = self.add(cell: candidate.cell, digit: candidate.digit)
+      else {
+        fatalError("Coding error: failed to add \(candidate.digit+1) to \(candidate.cell.label)")
+      }
+       
+      if solve() { return true }
+
+ //     print("FAILED: \(candidate.cell.label) = \(candidate.digit+1)")
+      breakpoint(on:candidate.cell.label)
+      attempt.undo()
+      solution.removeLast()
+    }
+    return false
+  }
+  
+  var bestCandidates : Candidates?
+  {
+    var bestCount = Int.max
+    var rval : Candidates?
+    for element in elements {
+      if element.complete { continue }
+      
+      guard let candidates = element.candidates else { return nil }
+      
+      if candidates.count < bestCount
+      {
+          bestCount = candidates.count
+          rval = candidates
+      }
+    }
+    return rval
   }
 }

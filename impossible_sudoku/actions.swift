@@ -12,15 +12,14 @@ import Foundation
 //  after undo will be exactly the same as it was before the action
 //  was run.
 
-protocol Action
+protocol Undoable
 {
-  func run() -> Void
   func undo() -> Void
 }
 
-typealias Actions = Array<Action>
+typealias Undoables = Array<Undoable>
 
-struct SetCellDigit : Action
+struct SetCellDigit : Undoable
 {
   // There are a number of things that must happen when assigning
   // a digit to a cell
@@ -39,40 +38,45 @@ struct SetCellDigit : Action
   let cell : Cell
   let digit : Int
   
-  private(set) var subActions = Actions()
-  
+  var addDigitToRow : Undoable?
+  var addDigitToCol : Undoable?
+  var addDigitToBox : Undoable?
+  var addDigitToCage : Undoable?
+  var updateNeighbors : Undoable?
+    
   init?(puzzle:Puzzle, cell:Cell, digit:Int)
   {
-    guard cell.digit == nil else { return nil }
     guard cell.availableDigits.contains(digit) else { return nil }
     self.cell = cell
     self.digit = digit
-    
-    subActions.append(UpdateCellGroup(cell.row, cell:cell, digit:digit))
-    subActions.append(UpdateCellGroup(cell.col, cell:cell, digit:digit))
-    subActions.append(UpdateCellGroup(cell.box, cell:cell, digit:digit))
-    
-    if let cage = cell.cage {
-      subActions.append(UpdateCellGroup(cage, cell:cell, digit:digit))
-    }
-    if let updateNeighbors = UpdateNeighbors(cell:cell, digit: digit)
-    {
-      subActions.append(updateNeighbors)
-    }
-  }
-  
-  func run() {
+        
     cell.digit = digit
-    subActions.forEach { $0.run() }
+    debug(1,cell.label,"set digit \(digit+1)")
+    
+    breakpoint(on: cell.label)
+    
+    addDigitToRow = AddDigitToGroup(cell.row, cell:cell, digit:digit)
+    addDigitToCol = AddDigitToGroup(cell.col, cell:cell, digit:digit)
+    addDigitToBox = AddDigitToGroup(cell.box, cell:cell, digit:digit)
+    addDigitToCage = AddDigitToGroup(cell.cage, cell:cell, digit:digit)
+    
+    updateNeighbors = UpdateNeighbors(cell:cell, digit: digit)
   }
   
   func undo() {
-    subActions.reversed().forEach { $0.undo() }
+    updateNeighbors?.undo()
+    
+    addDigitToCage?.undo()
+    addDigitToBox?.undo()
+    addDigitToCol?.undo()
+    addDigitToRow?.undo()
+    
+    debug(1,self.cell.label, "unset digit \(digit+1)")
     cell.digit = nil
   }
 }
 
-class UpdateCellGroup : Action
+class AddDigitToGroup : Undoable
 {
   // For each of the cell's groups (row, col, box, cage):
   // - mark the digit as covered
@@ -87,85 +91,155 @@ class UpdateCellGroup : Action
   let digit : Int
   
   let digitsWithCell : Array<Int>
-  let cellsWithDigit : Array<Cell>
-    
-  init(_ group:CellGroup, cell:Cell, digit:Int)
+  var subActions = Array<Undoable>()
+      
+  init?(_ group:CellGroup?, cell:Cell, digit:Int)
   {
-    if group.coveredDigits.contains(digit) { fatalError("should never get here") }
-    
+    guard let group = group else { return nil }
+    if group.coveredDigits.contains(digit) {
+      fatalError("Cannot cover \(group.label)=\(digit): alreay covered")
+    }
     self.group = group
     self.cell = cell
     self.digit = digit
     
-    self.digitsWithCell = Array(0..<9)
-      .filter { $0 != digit }
-      .filter { group.availableCells[$0].contains(cell) }
-    
-    self.cellsWithDigit = group.availableCells[digit]
-      .filter { $0 != cell }
-  }
-  func run() {
+    debug(2,group.label, "covering \(digit+1)")
     group.coveredDigits.insert(digit)
     
-    digitsWithCell.forEach { group.availableCells[$0].remove(cell) }
+    self.digitsWithCell = Array(0..<9)
+      .filter { group.availableCells[$0].contains(cell) }
     
-    cellsWithDigit.forEach { cell in
-      cell.availableDigits.remove(digit)
-      cell.row.availableCells[self.digit].remove(cell)
-      cell.col.availableCells[self.digit].remove(cell)
-      cell.box.availableCells[self.digit].remove(cell)
-      cell.cage?.availableCells[self.digit].remove(cell)
+    digitsWithCell.forEach { digit in
+      debug(3,"\(group.label)=\(digit+1)","remove \(cell.label)")
+      group.availableCells[digit].remove(cell)
+    }
+    
+    group.cellsAvailable(for:digit).forEach { cell in
+      subActions.append( RemoveCellAvailability(cell:cell, digit:digit) )
     }
   }
+  
   func undo() {
-    cellsWithDigit.reversed().forEach { cell in
-      cell.cage?.availableCells[self.digit].insert(cell)
-      cell.box.availableCells[self.digit].insert(cell)
-      cell.col.availableCells[self.digit].insert(cell)
-      cell.row.availableCells[self.digit].insert(cell)
-      cell.availableDigits.insert(digit)
+    subActions.reversed().forEach { $0.undo() }
+    
+    digitsWithCell.reversed().forEach { digit in
+        debug(3,"\(group.label)=\(digit+1)","insert \(cell.label)")
+        group.availableCells[digit].insert(cell)
     }
     
-    digitsWithCell.reversed().forEach { group.availableCells[$0].insert(cell) }
-    
+    debug(2,group.label,"uncovering \(digit+1)")
     group.coveredDigits.remove(digit)
   }
 }
 
-struct UpdateNeighbors : Action
+struct RemoveCellAvailability : Undoable
+{
+  // Removes digit from cell's candidate digis
+  // Removes cell as candidate for digit in each of its containing groups
+  let cell: Cell
+  let digit: Int
+
+  let removeFromRow : Undoable?
+  let removeFromCol : Undoable?
+  let removeFromBox : Undoable?
+  let removeFromCage: Undoable?
+  
+  init(cell:Cell, digit:Int)
+  {
+    guard cell.availableDigits.contains(digit) else
+    {
+      fatalError("Cannot remove \(digit+1) from \(cell.label)): already removed")
+    }
+    self.cell = cell
+    self.digit = digit
+    debug(3,cell.label,"remove \(digit+1)")
+    cell.availableDigits.remove(digit)
+    
+    removeFromRow = RemoveCellFromGroup(cell.row,cell:cell,digit:digit)
+    removeFromCol = RemoveCellFromGroup(cell.col,cell:cell,digit:digit)
+    removeFromBox = RemoveCellFromGroup(cell.box,cell:cell,digit:digit)
+    removeFromCage = RemoveCellFromGroup(cell.cage,cell:cell,digit:digit)
+  }
+  func undo()
+  {
+    removeFromCage?.undo()
+    removeFromBox?.undo()
+    removeFromCol?.undo()
+    removeFromRow?.undo()
+    
+    debug(3,cell.label,"insert \(digit+1)")
+    cell.availableDigits.insert(digit)
+  }
+}
+
+struct RemoveCellFromGroup : Undoable
+{
+  // Removes cell as candidate from the specified group
+  let group : CellGroup
+  let cell : Cell
+  let digit : Int
+  init?(_ group:CellGroup?,cell:Cell,digit:Int)
+  {
+    guard let group = group else { return nil }
+    guard group.availableCells[digit].contains(cell) else {
+      fatalError("Cannot remove \(cell) from \(group.label) for \(digit): already removed")
+    }
+    self.group = group
+    self.cell = cell
+    self.digit = digit
+    debug(4,"\(group.label)=\(digit+1)","remove \(cell.label)")
+    group.availableCells[digit].remove(cell)
+  }
+  func undo()
+  {
+    debug(4,"\(group.label)=\(digit+1)","insert \(cell.label)")
+    group.availableCells[digit].insert(cell)
+  }
+}
+
+struct UpdateNeighbors : Undoable
 {
   // This action handles removing the sequential digits as candidates
   // from neighboring cells.  It keeps track of which candidates were
   // removed so that it can correctly add them back during undo
   
-  var removeDigit = Array<(cell:Cell,digit:Int)>()
+  var removeDigit = Array<CellDigit>()
   
   init?(cell:Cell, digit:Int)
   {
     cell.neighbors.forEach { neighbor in
-      if neighbor.availableDigits.contains(digit-1) { removeDigit.append((neighbor,digit-1)) }
-      if neighbor.availableDigits.contains(digit+1) { removeDigit.append((neighbor,digit+1)) }
+      if neighbor.digit == nil {
+        if neighbor.availableDigits.contains(digit-1) { removeDigit.append((neighbor,digit-1)) }
+        if neighbor.availableDigits.contains(digit+1) { removeDigit.append((neighbor,digit+1)) }
+      }
     }
-    
     if removeDigit.count == 0 { return nil }
-  }
-  
-  func run() {
+    
     removeDigit.forEach { (cell,digit) in
+      debug(2,cell.label,"remove \(digit+1)")
       cell.availableDigits.remove(digit)
+      debug(3,"\(cell.row.label)=\(digit+1)","remove \(cell.label)")
       cell.row.availableCells[digit].remove(cell)
+      debug(3,"\(cell.col.label)=\(digit+1)","remove \(cell.label)")
       cell.col.availableCells[digit].remove(cell)
+      debug(3,"\(cell.box.label)=\(digit+1)","remove \(cell.label)")
       cell.box.availableCells[digit].remove(cell)
+      if cell.cage != nil { debug(3,"\(cell.cage!.label)=\(digit+1)","remove \(cell.label)") }
       cell.cage?.availableCells[digit].remove(cell)
     }
   }
   
   func undo() {
-    removeDigit.forEach { (cell,digit) in
+    removeDigit.reversed().forEach { (cell,digit) in
+      if cell.cage != nil { debug(3,"\(cell.cage!.label)=\(digit+1)","insert \(cell.label)") }
       cell.cage?.availableCells[digit].insert(cell)
+      debug(3,"\(cell.box.label)=\(digit+1)","remove \(cell.label)")
       cell.box.availableCells[digit].insert(cell)
+      debug(3,"\(cell.col.label)=\(digit+1)","remove \(cell.label)")
       cell.col.availableCells[digit].insert(cell)
+      debug(3,"\(cell.row.label)=\(digit+1)","remove \(cell.label)")
       cell.row.availableCells[digit].insert(cell)
+      debug(2,cell.label,"insert \(digit+1)")
       cell.availableDigits.insert(digit)
     }
   }

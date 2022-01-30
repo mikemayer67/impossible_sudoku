@@ -9,11 +9,15 @@ import Foundation
 
 typealias Digits = Set<Int>
 typealias Cells = Set<Cell>
+typealias CellDigit = (cell:Cell, digit:Int)
+typealias Candidates = Array<CellDigit>
 
 class Element
 {
   let label : String
   var complete : Bool { fatalError("abstract property") }
+  
+  var candidates : Candidates? { fatalError("abstract property") }
   
   init(_ label:String) {
     self.label = label
@@ -26,6 +30,32 @@ class CellGroup : Element
   var availableCells : Array<Cells> // indexed by digit
   
   override var complete : Bool { return coveredDigits.count == 9 }
+  
+  func cellsAvailable(for digit:Int) -> Array<Cell>
+  {
+    availableCells[digit].sorted { (a, b) -> Bool in
+      a.label < b.label
+    }
+  }
+  
+  override var candidates: Candidates?
+  {
+    var bestCount = Int.max
+    var bestDigit : Int?
+    for digit in 0..<9 {
+      if coveredDigits.contains(digit) { continue }
+      let n = availableCells[digit].count
+      if n > 0 && ( n < bestCount ) {
+        bestCount = n
+        bestDigit = digit
+      }
+    }
+    guard let digit = bestDigit else {
+//      print("NO CANDIDATES: \(self.label)")
+      return nil
+    }
+    return cellsAvailable(for:digit).map { ($0,digit) }
+  }
   
   override init(_ label:String)
   {
