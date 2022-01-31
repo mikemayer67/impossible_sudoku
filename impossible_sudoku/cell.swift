@@ -17,19 +17,14 @@ class Cell : Element, Hashable
   let cage : Cage?
   private(set) var neighbors = Array<Cell>()
   
-  var digit : Int?
-  var availableDigits : Digits
+  private var _digit : Int?
+  private var _available = Array<Bool>(repeating: true, count: 9  )
   
-  override var complete: Bool { digit != nil }
+  func hasAvailable(digit:Int) -> Bool { return _available[digit] }
   
-  override var candidates: Candidates?
-  {
-    guard digit == nil else {
-      print("No Candidates: \(self.label)")
-      return nil
-    }
-    return availableDigits.map { (self,$0) }
-  }
+  var digit : Int? { return _digit }
+  
+  override var complete: Bool { _digit != nil }
   
   init(_ puzzle:Puzzle, _ cell:Int)
   {
@@ -48,8 +43,6 @@ class Cell : Element, Hashable
     } else {
       self.cage = nil
     }
-    
-    self.availableDigits = Digits(0..<9)
     
     super.init("[\(cell/9)\(cell%9)]")
     
@@ -72,4 +65,74 @@ class Cell : Element, Hashable
   static func == (lhs: Cell, rhs: Cell) -> Bool { lhs.cell == rhs.cell }
   
   func hash(into hasher: inout Hasher) { hasher.combine(self.cell) }
+  
+  override func getCandidates() ->  CandidatesResult
+  {
+    if _digit != nil {
+      return .Complete
+    }
+    
+    let candidates = (0..<9)
+      .filter { _available[$0] }
+      .map { (self,$0) }
+    
+    if candidates.isEmpty {
+      debug_flow("No candidate digits s for \(self.label)")
+      return .NoSolution
+    }
+    
+    return .hasCandidates(candidates)
+  }
+  
+  func set(digit:Int) -> UndoAction
+  {
+    guard self._digit == nil else {
+      fatalError("Attempting to set \(self.label) to \(digit).  Already set to \(self._digit!)")
+    }
+    
+    let debugString = "setting \(digit+1)"
+    debug(self.label, debugString)
+    self._digit = digit
+    
+    var undo = Array<UndoAction>()
+    
+    if let action = self.row.set(self,digit) {undo.append(action)}
+    if let action = self.col.set(self,digit) {undo.append(action)}
+    if let action = self.box.set(self,digit) {undo.append(action)}
+    if let action = self.cage?.set(self,digit) {undo.append(action)}
+    
+    self.neighbors.forEach { neighbor in
+      if let action = neighbor.remove(digit: digit-1) { undo.append(action) }
+      if let action = neighbor.remove(digit: digit+1) { undo.append(action) }
+    }
+    
+    return {
+      undo.reversed().forEach {$0()}
+      
+      debug_undo(self.label, debugString)
+      self._digit = nil
+    }
+  }
+  
+  func remove(digit:Int) -> UndoAction?
+  {
+    guard self._available[digit] else { return nil }
+    
+    let debugString = "removing \(digit+1)"
+    debug(self.label,debugString)
+    self._available[digit] = false
+    
+    var undo = Array<UndoAction>()
+    
+    if let action = self.row.remove(self,digit) { undo.append(action) }
+    if let action = self.col.remove(self,digit) { undo.append(action) }
+    if let action = self.box.remove(self,digit) { undo.append(action) }
+    if let action = self.cage?.remove(self,digit) { undo.append(action) }
+    
+    return {
+      undo.reversed().forEach { $0() }
+      debug_undo(self.label,debugString)
+      self._available[digit] = true
+    }
+  }
 }

@@ -21,11 +21,24 @@ func breakpoint(on key:String)
   }
 }
 
-func debug(_ level:Int = 0 , _ key:String, _ s:String)
+func debug(_ key:String, _ s:String)
 {
   if debug_on, (watching.isEmpty || watching.contains(key)) {
-    let indent = String(repeating: " ", count: level)
+    let depth = Thread.callStackSymbols.count
+    let indent = String(repeating: " ", count: depth-mainDepth)
     print( "\(indent)\(key): \(s)")
+  }
+}
+
+func debug_undo(_ key:String, _ s:String)
+{
+  debug(key, "undo \(s)")
+}
+
+func debug_flow(_ s:String)
+{
+  if debug_flow_on {
+    print(s)
   }
 }
 
@@ -68,14 +81,14 @@ extension Puzzle
               str += ( dc==1 && dr == 1 ? "\(cd+1)" : " " )
             } else {
               let digit = 3*dr + dc
-              if cell.availableDigits.contains(digit)
+              if cell.hasAvailable(digit: digit)
               {
-                if !cell.row.coveredDigits.contains(digit),
-                   !cell.col.coveredDigits.contains(digit),
-                   !cell.box.coveredDigits.contains(digit),
-                   cell.row.availableCells[digit].contains(cell),
-                   cell.col.availableCells[digit].contains(cell),
-                   cell.box.availableCells[digit].contains(cell)
+                if !cell.row.contains(digit),
+                   !cell.col.contains(digit),
+                   !cell.box.contains(digit),
+                   cell.row.contains(cell, for:digit),
+                   cell.col.contains(cell, for:digit),
+                   cell.box.contains(cell, for:digit)
                 { str += "o"}
                 else { str += "x"}
               }

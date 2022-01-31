@@ -48,12 +48,13 @@ import Foundation
 //     - search tree based on minimizing number of forks at each node
 
 let debug_on = false
+let debug_flow_on = true
 let watching : Array<String> = []
 let breaking : Array<String> = []
+
+let mainDepth = Thread.callStackSymbols.count
 
 let thePuzzle = Puzzle()
 thePuzzle.add(row: 6, col: 3, digit: 1) // remember that our puzzle uses 0-8 rather than 1-9
 
 thePuzzle.solve()
-
-print("ok")

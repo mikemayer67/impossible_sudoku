@@ -41,17 +41,17 @@ class Puzzle
     elements.append(contentsOf: cells)
   }
   
-  @discardableResult
-  func add(row:Int, col:Int, digit:Int) -> SetCellDigit?
+
+  func add(row:Int, col:Int, digit:Int)
   {
-    return add(cell:cells[cellIndex(row: row, col: col)],digit:digit)
+    add(cell:cells[cellIndex(row: row, col: col)],digit:digit)
   }
-  
-  func add(cell:Cell, digit:Int) -> SetCellDigit?
+ 
+  @discardableResult
+  func add(cell:Cell, digit:Int) -> UndoAction
   {
-    guard let setCellDigit = SetCellDigit(puzzle:self, cell:cell, digit: digit) else { return nil }
     solution.append((cell,digit))
-    return setCellDigit
+    return cell.set(digit: digit)
   }
   
   @discardableResult
@@ -62,46 +62,50 @@ class Puzzle
       show_state()
       return true
     }
-    guard let candidates = self.bestCandidates else { return false }
+    guard let (nominator,candidates) = self.bestCandidates() else { return false }
     
     let s = candidates.reduce("") { "\($0) \($1.cell.label)=\($1.digit+1)" }
     show_state()
 
-//    print("CANDIDATES: \(s)")
+    debug_flow("CANDIDATES \(nominator): \(s)")
     
     for candidate in candidates {
-//      print("ATTEMPTING: \(candidate.cell.label) = \(candidate.digit+1)")
+      debug_flow("ATTEMPTING: \(candidate.cell.label) = \(candidate.digit+1)")
       breakpoint(on:candidate.cell.label)
-      guard let attempt = self.add(cell: candidate.cell, digit: candidate.digit)
-      else {
-        fatalError("Coding error: failed to add \(candidate.digit+1) to \(candidate.cell.label)")
-      }
+      
+      let undo = self.add(cell: candidate.cell, digit: candidate.digit)
        
       if solve() { return true }
 
- //     print("FAILED: \(candidate.cell.label) = \(candidate.digit+1)")
+      debug_flow("FAILED: \(candidate.cell.label) = \(candidate.digit+1)")
       breakpoint(on:candidate.cell.label)
-      attempt.undo()
+      
+      undo()
       solution.removeLast()
     }
     return false
   }
   
-  var bestCandidates : Candidates?
+  func bestCandidates() -> (String,Candidates)?
   {
     var bestCount = Int.max
+    var nominator = ""
     var rval : Candidates?
     for element in elements {
-      if element.complete { continue }
-      
-      guard let candidates = element.candidates else { return nil }
-      
-      if candidates.count < bestCount
-      {
+      switch element.getCandidates() {
+      case .Complete: break
+      case .NoSolution: return nil
+      case .hasCandidates(let candidates):
+        if candidates.count < bestCount {
           bestCount = candidates.count
+          nominator = element.label
           rval = candidates
+        }
       }
     }
-    return rval
+    
+    guard rval != nil else { return nil }
+    
+    return (nominator,rval!)
   }
 }
